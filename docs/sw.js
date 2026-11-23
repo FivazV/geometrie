@@ -2,7 +2,7 @@
 // LES PAGES : le réseau d'abord — avec une connexion, l'élève voit toujours la dernière version, sans rien rafraîchir ;
 // sans connexion (ou si le réseau traîne plus de 4 secondes), la copie gardée sur le téléphone.
 // LE RESTE (polices, icônes) : la copie gardée d'abord, rafraîchie en arrière-plan.
-const CACHE = 'geometrie-2026-11-23c';
+const CACHE = 'geometrie-2026-11-23d';
 const FICHIERS = [
 	"./",
 	"index.html",

@@ -36,8 +36,8 @@ h1{font-size:34pt;margin:0 0 4mm}
 .marche ol{margin:0;padding-left:6mm;font-size:12pt;line-height:1.45}
 .pied{font-size:11pt;color:#445566;margin-top:7mm}
 </style></head><body>
-<h1>Géométrie</h1>
-<p class="sous">Médiatrice, bissectrice, cercle circonscrit, cercle inscrit : les constructions au compas, pas à pas.</p>
+<h1>Maths</h1>
+<p class="sous">Les constructions au compas pas à pas, et les corrections de la remédiation.</p>
 <div class="qr">${svg}</div>
 <p class="adresse">fivazv.github.io/geometrie</p>
 <div class="marches">

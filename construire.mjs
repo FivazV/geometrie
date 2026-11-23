@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const SORTIE = resolve(ICI, 'docs');
-const VERSION = '2026-11-23c';
+const VERSION = '2026-11-23d';
 
 const TUILES = [
 	{
@@ -116,7 +116,7 @@ const TETE_COMMUNE = `<link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icones/icone-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Géométrie">`;
+<meta name="apple-mobile-web-app-title" content="Maths">`;
 const SERVICE = `<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>`;
 // (Dans le flux de la page, au-dessus du titre : en position fixe, il recouvrait le titre de l'animation.)
 const retour = (href, nom) =>
@@ -125,7 +125,7 @@ const echapper = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/
 
 /** Copie une animation dans le site ; rend l'intitulé qu'elle affiche (son grand titre). */
 function animation(tuile, a) {
-	let s = readFileSync(resolve(tuile.dossier, a.source), 'utf8').replace(/\r\n/g, '\n');
+	let s = readFileSync(a.chemin, 'utf8').replace(/\r\n/g, '\n');
 	// L'intitulé : le grand titre de la page, tel que l'élève le lit ; à défaut, le titre de l'onglet.
 	const h1 = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(s)?.[1] ?? /<title>([^<]*)<\/title>/.exec(s)?.[1] ?? '';
 	const intitule = h1
@@ -193,10 +193,10 @@ ${SERVICE}
 
 const accueil = () =>
 	page(
-		'Géométrie',
+		'Maths',
 		`<header>
 <img src="icones/icone-192.png" alt="">
-<div><h1>Géométrie</h1><p>Choisis un domaine.</p></div>
+<div><h1>Maths</h1><p>Choisis un domaine.</p></div>
 </header>
 <ul class="tuiles">
 ${TUILES.map((t) => `<li><a href="${t.page}"><strong>${t.nom}</strong><span>${echapper(t.texte)}</span></a></li>`).join('\n')}
@@ -211,7 +211,7 @@ ${TUILES.map((t) => `<li><a href="${t.page}"><strong>${t.nom}</strong><span>${ec
 
 const domaine = (t, intitules) =>
 	page(
-		`${t.nom} — Géométrie`,
+		`${t.nom} — Maths`,
 		`<a class="retour" href="./">← Accueil</a>
 <header>
 <div><h1>${t.nom}</h1><p>${echapper(t.texte)}</p></div>
@@ -234,8 +234,8 @@ ${r.animations
 const manifeste = () =>
 	JSON.stringify(
 		{
-			name: 'Géométrie — les animations',
-			short_name: 'Géométrie',
+			name: 'Maths — les animations',
+			short_name: 'Maths',
 			lang: 'fr',
 			start_url: './',
 			scope: './',
@@ -293,6 +293,21 @@ self.addEventListener('fetch', (e) => {
 
 // ── La construction ────────────────────────────────────────────────────────────────────────────────────────────
 await polices();
+
+// LES SOURCES, AVANT DE TOUCHER À QUOI QUE CE SOIT (23.11 : le disque E: était débranché, et le script avait déjà vidé
+// `docs/` quand il s'en est aperçu). Chaque animation lue sur E: est recopiée dans `sources/` ; sans le disque, c'est
+// cette copie qui sert. S'il manque une seule source, on s'arrête ici, `docs/` intact.
+for (const t of TUILES) {
+	const copies = resolve(ICI, 'sources', t.page.replace('.html', ''));
+	mkdirSync(copies, { recursive: true });
+	for (const a of t.rubriques.flatMap((r) => r.animations)) {
+		const origine = resolve(t.dossier, a.source);
+		a.chemin = resolve(copies, a.source);
+		if (existsSync(origine)) copyFileSync(origine, a.chemin);
+		else if (existsSync(a.chemin)) console.log(`(disque absent : copie locale de ${a.source})`);
+		else throw new Error(`source introuvable, sur le disque comme en copie locale : ${origine}`);
+	}
+}
 rmSync(SORTIE, { recursive: true, force: true });
 mkdirSync(resolve(SORTIE, 'polices'), { recursive: true });
 mkdirSync(resolve(SORTIE, 'icones'), { recursive: true });
