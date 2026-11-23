@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Géométrie</title>
+<link rel="stylesheet" href="polices/polices.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d4e89">
+<link rel="icon" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Géométrie">
+<style>
+:root{--fond:#eef2f6;--carte:#ffffff;--encre:#16222e;--doux:#566676;--trait:#d3dce5;--bleu:#1d4e89;--bleu-doux:#e2ecf7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fond:#0f1820;--carte:#18242f;--encre:#e7eef4;--doux:#9db0bf;--trait:#2b3b49;--bleu:#7fb2ea;--bleu-doux:#1b2f44;color-scheme:dark}}
+:root[data-theme="dark"]{--fond:#0f1820;--carte:#18242f;--encre:#e7eef4;--doux:#9db0bf;--trait:#2b3b49;--bleu:#7fb2ea;--bleu-doux:#1b2f44;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--fond);color:var(--encre);font:17px/1.5 "Figtree","Segoe UI",system-ui,sans-serif;padding:0 16px 48px}
+main{max-width:640px;margin:0 auto}
+header{display:flex;align-items:center;gap:14px;padding:28px 0 18px}
+header img{width:56px;height:56px;border-radius:14px;flex:none}
+h1{font:700 1.9rem/1.1 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;margin:0}
+header p{margin:2px 0 0;color:var(--doux)}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+li a{display:block;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:16px 18px;color:inherit;text-decoration:none}
+li a:active{background:var(--bleu-doux)}
+li strong{display:block;font:700 1.2rem/1.25 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--bleu)}
+li span{color:var(--doux)}
+details{margin-top:26px;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:14px 18px}
+summary{font-weight:600;cursor:pointer}
+details p{margin:10px 0 0}
+</style>
+</head>
+<body>
+<main>
+<header>
+<img src="icones/icone-192.png" alt="">
+<div><h1>Géométrie</h1><p>Les constructions au compas, pas à pas.</p></div>
+</header>
+<ul>
+<li><a href="mediatrice.html"><strong>La médiatrice</strong><span>Construire la médiatrice d’un segment, au compas et à la règle.</span></a></li>
+<li><a href="bissectrice.html"><strong>La bissectrice</strong><span>Partager un angle en deux angles égaux, au compas et à la règle.</span></a></li>
+<li><a href="cercle-circonscrit.html"><strong>Le cercle circonscrit</strong><span>Le cercle qui passe par les trois sommets d’un triangle.</span></a></li>
+<li><a href="cercle-inscrit.html"><strong>Le cercle inscrit</strong><span>Le cercle qui touche les trois côtés d’un triangle.</span></a></li>
+</ul>
+<details>
+<summary>Mettre cette page sur l’écran de mon téléphone</summary>
+<p><strong>Android (Chrome)</strong> : touche les trois points en haut à droite, puis « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
+<p><strong>iPhone (Safari)</strong> : touche le bouton de partage (le carré avec une flèche), puis « Sur l’écran d’accueil ».</p>
+<p>Une fois installée, l’application fonctionne aussi sans connexion.</p>
+</details>
+</main>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>
+</body>
+</html>
