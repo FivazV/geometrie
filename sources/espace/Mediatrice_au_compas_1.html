@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:light}body{margin:0}</style>
+<title>Médiatrice au compas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=Newsreader:ital,wght@1,500&display=swap">
+<style>
+/* Layout: une scène de papier quadrillé vue du dessus, puis une carte de légende et les commandes. */
+:root{
+  --desk:#dde4ea; --paper:#fdfdfb; --grid:#d5e0ec; --grid-major:#b4c4d8;
+  --ink:#1d2733; --muted:#566272; --line:#c3ceda;
+  --accent:#e0452b; --circle:#17825f; --construct:#2563a8;
+  --card:#f3f6f9; --chip:#e6ecf2; --chip-on:#1d2733; --chip-on-fg:#ffffff;
+  --ruler:rgba(150,196,230,.74); --ruler-edge:#5f8fb5;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-math:"Newsreader","Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --desk:#12171c; --paper:#232b33; --grid:#2d3843; --grid-major:#3d4b5a;
+  --ink:#e8edf2; --muted:#9aa8b6; --line:#35414d;
+  --accent:#ff6b4f; --circle:#4fd1a1; --construct:#6fb0f0;
+  --card:#1a2027; --chip:#252e37; --chip-on:#e8edf2; --chip-on-fg:#12171c;
+  --ruler:rgba(120,170,210,.55); --ruler-edge:#8fb8d8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#12171c; --paper:#232b33; --grid:#2d3843; --grid-major:#3d4b5a;
+  --ink:#e8edf2; --muted:#9aa8b6; --line:#35414d;
+  --accent:#ff6b4f; --circle:#4fd1a1; --construct:#6fb0f0;
+  --card:#1a2027; --chip:#252e37; --chip-on:#e8edf2; --chip-on-fg:#12171c;
+  --ruler:rgba(120,170,210,.55); --ruler-edge:#8fb8d8; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.1;margin:0;text-wrap:balance}
+.sub{margin:4px 0 0;color:var(--muted);max-width:60ch}
+.stage{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--paper);box-shadow:0 10px 30px rgba(10,20,30,.14)}
+.stage svg{display:block;width:100%;height:auto}
+.lbl{font-family:var(--f-math);font-style:italic;font-weight:500;font-size:26px;fill:var(--ink)}
+.lbl.s{font-size:22px}
+.lbl.c{fill:var(--construct)}
+.lbl.r{fill:var(--accent)}
+.panel{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.panel>.card:first-child{min-height:330px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.badge{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card h2{font-family:var(--f-display);font-size:1.3rem;line-height:1.2;margin:4px 0 6px;text-wrap:balance}
+.card p{margin:0 0 8px}
+.gesture{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-weight:500}
+.gesture::before{content:"";flex:none;width:10px;height:10px;margin-top:7px;border-radius:50%;background:var(--accent)}
+.why{margin-top:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);font-size:.92rem;color:var(--muted)}
+.why[hidden]{display:none}
+.ctrl{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select{font:inherit;color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600}
+.btn.main{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on);min-width:7.5rem}
+.btn:focus-visible,.chip:focus-visible,select:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--construct);outline-offset:2px}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:8px 12px;cursor:pointer;min-width:0}
+.chip b{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--paper);border:1px solid var(--line);font-size:.8rem}
+.chip.on{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on)}
+.chip.on b{background:var(--accent);border-color:var(--accent);color:#fff}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.speed{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.9rem}
+select{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+@media (max-width:720px){.panel{grid-template-columns:minmax(0,1fr)}}
+.btn[aria-pressed="true"]{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Construire une médiatrice au compas</h1>
+    <p class="sub">Regarde les gestes de la main qui tient le compas et de celle qui maintient la règle. Tu peux mettre en pause, avancer à la main ou sauter à une étape.</p>
+  </header>
+
+  <div class="stage">
+  <svg id="scene" viewBox="0 0 900 600" role="img" aria-label="Animation : construction de la médiatrice d'un segment avec un compas et une règle, avec deux mains.">
+    <defs>
+      <pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" style="stroke:var(--grid)" stroke-width="1"/></pattern>
+      <pattern id="g5" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" style="stroke:var(--grid-major)" stroke-width="1.2"/></pattern>
+      <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d6b8"/><stop offset=".6" stop-color="#e5b48d"/><stop offset="1" stop-color="#d49b74"/></linearGradient>
+      <linearGradient id="skinD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dfae88"/><stop offset="1" stop-color="#c58d68"/></linearGradient>
+      <linearGradient id="sleeve" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6283a3"/><stop offset=".55" stop-color="#4c6c8c"/><stop offset="1" stop-color="#3a5570"/></linearGradient>
+      <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3e8ee"/><stop offset=".5" stop-color="#a9b2bd"/><stop offset="1" stop-color="#7c8793"/></linearGradient>
+      <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.2"/></filter>
+    </defs>
+
+    <rect width="900" height="600" style="fill:var(--paper)"/>
+    <rect width="900" height="600" fill="url(#g1)"/>
+    <rect width="900" height="600" fill="url(#g5)"/>
+
+    <path id="tri" d="" fill="none" style="stroke:var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+    <g id="vlab"></g>
+    <g id="ink" fill="none" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--construct)" stroke-width="2.6"></g>
+    <g id="inkC" fill="none" stroke-linecap="round" style="stroke:var(--circle)" stroke-width="3.6"></g>
+    <g id="bisG"></g>
+    <g id="pts"></g>
+    <g id="marks" opacity="0"></g>
+    <g id="radii" opacity="0"></g>
+    <!-- règle -->
+    <g id="ruler" opacity="0">
+      <rect x="-70" y="1" width="640" height="46" rx="5" fill="rgba(0,0,0,.2)" filter="url(#soft)" transform="translate(6 9)"/>
+      <rect x="-70" y="0" width="640" height="46" rx="5" style="fill:var(--ruler);stroke:var(--ruler-edge)" stroke-width="1.5"/>
+      <g id="rticks" style="stroke:var(--ruler-edge)" stroke-width="1.2"></g>
+    </g>
+
+    <!-- compas -->
+    <g id="compass">
+      <g id="cShadow" filter="url(#soft)" opacity=".5">
+        <line id="shL1" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+        <line id="shL2" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+      </g>
+      <line id="legN" stroke="url(#metal)" stroke-width="11" stroke-linecap="round"/>
+      <line id="needle" stroke="#59636e" stroke-width="2.4" stroke-linecap="round"/>
+      <line id="legP" stroke="url(#metal)" stroke-width="11" stroke-linecap="round"/>
+      <line id="wood" stroke="#e0b48a" stroke-width="12" stroke-linecap="butt"/>
+      <line id="lead" stroke="#2f343a" stroke-width="3.4" stroke-linecap="round"/>
+      <line id="stem" stroke="#8c96a1" stroke-width="7" stroke-linecap="round"/>
+      <circle id="hinge" r="13" fill="url(#metal)" stroke="#6b7580" stroke-width="1.5"/>
+    </g>
+
+    <!-- crayon (étape 4) -->
+    <g id="pencilG" opacity="0">
+      <g id="pencilBody">
+        <path d="M0,0 L-5.5,-24 L5.5,-24Z" fill="#e0b48a"/>
+        <path d="M0,0 L-1.9,-8 L1.9,-8Z" fill="#2f343a"/>
+        <rect x="-5.5" y="-210" width="11" height="186" fill="#d4472d"/>
+        <rect x="-5.5" y="-210" width="3.5" height="186" fill="rgba(255,255,255,.28)"/>
+        <rect x="-5.5" y="-60" width="11" height="6" fill="rgba(0,0,0,.18)"/>
+      </g>
+      <use href="#handPinch" transform="translate(0 -62) scale(.8)"/>
+    </g>
+
+    <defs>
+      <!-- main droite en pince, vue de dessus : pointe des doigts en (0,0), bras vers le haut -->
+      <g id="handPinch" stroke="rgba(110,64,36,.42)" stroke-width="1.5" stroke-linejoin="round">
+        <path d="M-36,-188 L-42,-340 L46,-340 L40,-188Z" fill="url(#skin)" stroke="none"/>
+        <circle cx="0" cy="5" r="8.5" fill="#97a1ac" stroke="#5c6670"/>
+        <path d="M-60,-92 C-66,-72 -62,-54 -54,-46 C-46,-42 -40,-48 -42,-58 C-42,-70 -42,-80 -42,-92Z" fill="url(#skinD)"/>
+        <path d="M-78,-94 C-82,-80 -78,-66 -72,-60 C-66,-56 -62,-62 -62,-70 C-62,-78 -62,-86 -62,-94Z" fill="url(#skinD)"/>
+        <path d="M-42,-90 C-48,-66 -44,-44 -34,-34 C-26,-28 -20,-36 -22,-48 C-22,-62 -22,-80 -22,-92Z" fill="url(#skinD)"/>
+        <path d="M52,-112 C64,-84 50,-50 26,-18 C16,-6 8,0 3,-4 C0,-12 8,-24 14,-34 C22,-48 26,-70 22,-96Z" fill="url(#skin)"/>
+        <path d="M-78,-92 C-86,-130 -62,-170 -36,-190 L40,-190 C64,-166 72,-126 56,-100 C54,-90 40,-88 22,-92Z" fill="url(#skin)"/>
+        <path d="M-22,-92 C-26,-60 -20,-28 -13,-6 C-11,1 -3,3 2,-2 C8,-14 8,-52 6,-92Z" fill="url(#skin)"/>
+        <ellipse cx="-4" cy="-13" rx="5.5" ry="8.5" transform="rotate(8 -4 -13)" fill="rgba(255,238,228,.72)"/>
+        <g fill="rgba(255,255,255,.26)" stroke="none"><ellipse cx="-62" cy="-100" rx="7" ry="4.5"/><ellipse cx="-36" cy="-104" rx="7" ry="4.5"/><ellipse cx="-12" cy="-102" rx="7" ry="4.5"/><ellipse cx="14" cy="-98" rx="6" ry="4"/></g>
+        <g fill="none" stroke="rgba(150,90,60,.2)"><path d="M-48,-108 C-42,-140 -38,-165 -30,-184"/><path d="M-24,-108 C-18,-140 -10,-165 -4,-186"/><path d="M2,-104 C8,-140 14,-165 20,-186"/></g>
+        <path d="M-58,-240 L-70,-352 L76,-352 L62,-240 C22,-228 -22,-228 -58,-240Z" fill="url(#sleeve)" stroke="rgba(0,0,0,.2)"/>
+        <path d="M-58,-240 C-22,-228 22,-228 62,-240" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="2.4"/>
+      </g>
+      <!-- main gauche à plat, doigts vers le haut -->
+      <g id="handFlat" stroke="rgba(110,64,36,.42)" stroke-width="1.5" stroke-linejoin="round">
+        <path d="M-36,40 L-42,340 L44,340 L38,40Z" fill="url(#skin)" stroke="none"/>
+        <rect x="-52" y="-96" width="20" height="86" rx="10" fill="url(#skin)"/>
+        <rect x="-30" y="-116" width="22" height="106" rx="11" fill="url(#skin)"/>
+        <rect x="-6" y="-124" width="22" height="114" rx="11" fill="url(#skin)"/>
+        <rect x="18" y="-112" width="22" height="102" rx="11" fill="url(#skin)"/>
+        <rect x="-11" y="-50" width="23" height="70" rx="11.5" transform="translate(58 4) rotate(36)" fill="url(#skin)"/>
+        <rect x="-54" y="-46" width="108" height="104" rx="30" fill="url(#skin)"/>
+        <g fill="rgba(255,238,228,.7)" stroke="none"><ellipse cx="-42" cy="-84" rx="6" ry="8"/><ellipse cx="-19" cy="-104" rx="6.5" ry="8.5"/><ellipse cx="5" cy="-112" rx="6.5" ry="8.5"/><ellipse cx="29" cy="-100" rx="6.5" ry="8.5"/></g>
+        <g fill="none" stroke="rgba(150,90,60,.2)"><path d="M-30,-20 C-30,0 -30,20 -26,40"/><path d="M-6,-20 C-6,0 -6,20 -4,40"/><path d="M18,-20 C18,0 18,20 14,40"/></g>
+        <path d="M-52,110 L-64,340 L70,340 L56,110 C20,122 -20,122 -52,110Z" fill="url(#sleeve)" stroke="rgba(0,0,0,.2)"/>
+        <path d="M-52,110 C-20,122 20,122 56,110" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="2.4"/>
+      </g>
+    </defs>
+
+    <g id="handR"><use href="#handPinch" transform="scale(.8)"/></g>
+    <g id="handL" opacity="1"><use href="#handFlat" transform="scale(.8)"/></g>
+  </svg>
+  </div>
+
+  <div class="panel">
+    <section class="card" aria-live="polite">
+      <div class="badge" id="badge">Départ</div>
+      <h2 id="title">L'angle de départ</h2>
+      <p id="text">On veut partager l'angle xOy en deux angles égaux, avec un compas, une règle et un crayon.</p>
+      <div class="gesture" id="gesture">Le compas est prêt.</div>
+      <div class="why" id="why" hidden><strong>Pourquoi ça marche ?</strong> P et Q sont chacun à la même distance de A et de B. Ils sont donc sur la médiatrice de [AB], et deux points suffisent pour tracer une droite.</div>
+    </section>
+
+    <section class="card ctrl" aria-label="Commandes">
+      <div class="row">
+        <button class="btn main" id="play" type="button">Pause</button>
+        <button class="btn" id="restart" type="button">Recommencer</button>
+        <button class="btn" id="loop" type="button" aria-pressed="false">Boucle : non</button>
+      </div>
+      <label class="speed" for="seek">Avancer à la main
+        <input id="seek" type="range" min="0" max="1000" value="0" step="1">
+      </label>
+      <div class="chips" id="chips"></div>
+      <div class="speed"><label for="speed">Vitesse</label>
+        <select id="speed"><option value="0.6">Lente</option><option value="1" selected>Normale</option><option value="1.5">Rapide</option></select>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var NS="http://www.w3.org/2000/svg", D=Math.PI/180, CFG={"mode": "med", "closed": false, "pts": [{"n": "A", "x": 230, "y": 320}, {"n": "B", "x": 650, "y": 280}], "cons": [{"U": "A", "V": "B", "k": 1.25, "P": "P", "Q": "Q", "lrest": {"x": 830, "y": 600}}], "steps": [{"badge": "Départ", "title": "Le segment [AB]", "text": "La médiatrice d'un segment est la droite perpendiculaire à ce segment, qui passe par son milieu. Elle se construit avec un compas et une règle.", "chip": "Le segment [AB]"}, {"badge": "Étape 1 sur 3", "title": "Un arc centré en A", "text": "On pique en A, avec une ouverture plus grande que la moitié de AB. On trace un arc au-dessus et en dessous du segment.", "chip": "Arc centré en A"}, {"badge": "Étape 2 sur 3", "title": "Le même arc centré en B", "text": "On garde exactement la même ouverture, on pique en B et on trace un second arc. Les deux arcs se croisent en deux points, P et Q.", "chip": "Arc centré en B"}, {"badge": "Étape 3 sur 3", "title": "La droite (PQ)", "text": "On pose la règle sur P et Q et on trace la droite. C'est la médiatrice de [AB] : elle coupe le segment en son milieu M, à angle droit.", "chip": "Règle et médiatrice"}]};
+function pt(c,r,a){return {x:c.x+r*Math.cos(a*D),y:c.y+r*Math.sin(a*D)}}
+function ang(p,q){return Math.atan2(q.y-p.y,q.x-p.x)/D}
+function dist(p,q){return Math.hypot(q.x-p.x,q.y-p.y)}
+function wrap180(x){while(x>180)x-=360;while(x<=-180)x+=360;return x}
+function wrapA(x){while(x>90)x-=360;while(x<=-270)x+=360;return x}
+function haFor(th){var b=null;[th-90,th+90].forEach(function(c){c=wrapA(c);var dd=Math.abs(c+90);if(b===null||dd<b.dd)b={c:c,dd:dd}});return b.c}
+function clamp(x,a,b){return Math.min(b,Math.max(a,x))}
+function lerp(a,b,f){return a+(b-a)*f}
+function ease(f){return f<.5?4*f*f*f:1-Math.pow(-2*f+2,3)/2}
+function sm(f){return f*f*(3-2*f)}
+function mix(a,b,f){return {x:lerp(a.x,b.x,f),y:lerp(a.y,b.y,f)}}
+function setL(el,a,b){el.setAttribute("x1",a.x);el.setAttribute("y1",a.y);el.setAttribute("x2",b.x);el.setAttribute("y2",b.y)}
+function mk(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var q in attrs)e.setAttribute(q,attrs[q]);(parent||$("pts")).appendChild(e);return e}
+function lab(txt,x,y,cls,parent){var e=mk("text",{x:x,y:y,"class":"lbl "+(cls||"")},parent);e.textContent=txt;return e}
+function away(p,from,d){var l=dist(p,from)||1;return {x:(p.x-from.x)/l*d,y:(p.y-from.y)/l*d}}
+
+var P0={}, names=[], G0={x:0,y:0};
+CFG.pts.forEach(function(p){P0[p.n]={x:p.x,y:p.y};names.push(p.n);G0.x+=p.x/CFG.pts.length;G0.y+=p.y/CFG.pts.length});
+var circ=CFG.mode==="circ", O=null, R=0;
+if(circ){
+  var a=P0.A,b=P0.B,c=P0.C, dd=2*(a.x*(b.y-c.y)+b.x*(c.y-a.y)+c.x*(a.y-b.y));
+  var sa=a.x*a.x+a.y*a.y, sb=b.x*b.x+b.y*b.y, sc=c.x*c.x+c.y*c.y;
+  O={x:(sa*(b.y-c.y)+sb*(c.y-a.y)+sc*(a.y-b.y))/dd, y:(sa*(c.x-b.x)+sb*(a.x-c.x)+sc*(b.x-a.x))/dd};
+  R=dist(O,a);
+}
+var REST={Px:760,Py:235,r:48,th:-105,ha:haFor(-105),cf:0};
+function st(P,r,th,cf){return {Px:P.x,Py:P.y,r:r,th:th,ha:haFor(th),cf:cf||0}}
+
+var CON=CFG.cons.map(function(c,k){
+  var U=P0[c.U],V=P0[c.V],d=dist(U,V),half=d/2,r=c.k*half,h=Math.sqrt(r*r-half*half);
+  var phi=Math.acos(half/r)/D, span=phi+16, dir=ang(U,V), M={x:(U.x+V.x)/2,y:(U.y+V.y)/2};
+  var u={x:Math.cos((dir-90)*D),y:Math.sin((dir-90)*D)};
+  if(circ&&u.x*(O.x-M.x)+u.y*(O.y-M.y)<0)u={x:-u.x,y:-u.y};
+  var lo=c.lo||(h+(circ?35:40)), hi=c.hi||(circ?Math.max(h,dist(M,O))+70:h+40);
+  var S={x:M.x-lo*u.x,y:M.y-lo*u.y}, E={x:M.x+hi*u.x,y:M.y+hi*u.y}, tb=ang(S,E);
+  var rot=tb; if(rot>90)rot-=180; if(rot<=-90)rot+=180;
+  var flipped=Math.abs(wrap180(rot-tb))>1, x0=flipped?500:0, dr={x:Math.cos(rot*D),y:Math.sin(rot*D)};
+  var origin={x:S.x-x0*dr.x,y:S.y-x0*dr.y}, nrm={x:-dr.y,y:dr.x}, xh=flipped?545:-42;
+  return {k:k,c:c,U:U,V:V,r:r,h:h,M:M,u:u,S:S,tb:tb,len:lo+hi,rot:rot,origin:origin,
+    press:{x:origin.x+xh*dr.x+26*nrm.x,y:origin.y+xh*dr.y+26*nrm.y},lrest:c.lrest,sc:c.sc||1,
+    Pp:{x:M.x+h*u.x,y:M.y+h*u.y},Qq:{x:M.x-h*u.x,y:M.y-h*u.y},
+    a1s:dir-span,a1e:dir+span,a2s:dir+180-span,a2e:dir+180+span,dir:dir};
+});
+
+var STEPS=CFG.steps, S=[];
+function add(o){S.push(o);return o}
+add({id:"intro",d:1100,to:REST,n:0,kc:0,g:"Le compas est prêt, la main gauche tient la feuille."});
+CON.forEach(function(q,k){
+  var c=q.c, map=circ?[k+1,k+1,k+1,k+1,k+1,k+1,k+1,k+1,k+1,k+1]:[1,1,1,2,2,2,3,3,3,3];
+  var seg=[
+   ["toU",1500,st(q.U,60,q.a1s),"Pose la pointe sèche sur "+c.U+"."],
+   ["open",1200,st(q.U,q.r,q.a1s),"Ouvre le compas un peu plus que la moitié de ["+c.U+c.V+"]."],
+   ["draw1",2400,st(q.U,q.r,q.a1e),"Trace un arc de part et d'autre de ["+c.U+c.V+"], sans changer l'ouverture.",{draw:true}],
+   ["toV",1800,st(q.V,q.r,q.a2s),"Garde la même ouverture et pique la pointe en "+c.V+"."],
+   ["draw2",2400,st(q.V,q.r,q.a2e),"Trace le second arc : il croise le premier en "+c.P+" et en "+c.Q+".",{draw:true}],
+   ["hold",1300,st(q.V,q.r,q.a2e),"Les points "+c.P+" et "+c.Q+" sont à la même distance de "+c.U+" et de "+c.V+"."],
+   ["away",1300,REST,"Range le compas."],
+   ["ruler",1500,REST,"Pose la règle sur "+c.P+" et "+c.Q+". La main gauche la maintient.",{hide:true}],
+   ["line",2200,REST,"Trace la droite ("+c.P+c.Q+").",{hide:true}],
+   ["clear",1000,REST,"Retire la règle.",{hide:true}]
+  ];
+  seg.forEach(function(s,i){add({id:k+s[0],d:s[1]*q.sc,to:s[2],g:s[3],n:map[i],kc:k,draw:s[4]&&s[4].draw,hide:s[4]&&s[4].hide})});
+});
+var LK=CON.length-1;
+if(circ){
+  add({id:"center",d:1600,to:REST,n:3,kc:LK,hide:true,hand:"off",g:"Les deux médiatrices se coupent en O."});
+  add({id:"toO",d:1900,to:st(O,R,ang(O,P0.A),1),n:4,kc:LK,g:"Pique la pointe en O et ouvre le compas jusqu'à A."});
+  add({id:"circ",d:4200,to:st(O,R,ang(O,P0.A)-360,1),n:4,kc:LK,draw:true,circle:true,g:"Fais tourner le compas : le cercle passe par A, B et C."});
+  add({id:"final",d:3800,to:st(O,R,ang(O,P0.A)-360,1),n:4,kc:LK,g:"Terminé : O est le centre du cercle circonscrit."});
+}else{
+  var Z=CFG.zone;
+  if(Z)add({id:"zone",d:2800,to:REST,n:4,kc:LK,hide:true,hand:"off",g:Z.g});
+  add({id:"final",d:3800,to:REST,n:Z?4:3,kc:LK,hide:true,hand:"off",g:Z?Z.gFinal:"Terminé : ("+CFG.cons[0].P+CFG.cons[0].Q+") est la médiatrice de ["+CFG.cons[0].U+CFG.cons[0].V+"]. Elle passe par son milieu M, à angle droit."});
+}
+var by={}, total=0;
+S.forEach(function(s,i){s.t0=total;total+=s.d;by[s.id]=s;s.from=i?S[i-1].to:REST});
+window.TOTAL=total; window.BYS=by;
+function segEnd(id){return by[id].t0+by[id].d}
+function prog(id,t){return clamp((t-by[id].t0)/by[id].d,0,1)}
+
+/* figure */
+var sp=CFG.pts.map(function(p,i){return (i?"L":"M")+p.x+" "+p.y}).join("")+(CFG.closed?"Z":"");
+if(!CFG.noShape)$("tri").setAttribute("d",sp);
+CFG.pts.forEach(function(p){
+  var o=away(p,G0,30);
+  if(!CFG.noShape)mk("circle",{cx:p.x,cy:p.y,r:5,style:"fill:var(--ink)"},$("vlab"));
+  lab(p.n,p.x+o.x-8,p.y+o.y+9,"",$("vlab"));
+});
+var PTS=[];
+function addPt(p,txt,off,at){var g=mk("g",{opacity:0});mk("circle",{cx:p.x,cy:p.y,r:4.5,style:"fill:var(--construct)"},g);lab(txt,p.x+off.x,p.y+off.y,"c",g);PTS.push({g:g,at:at})}
+CON.forEach(function(q){
+  var c=q.c, k=q.k;
+  var pr={x:-q.u.y,y:q.u.x}; if(pr.x-pr.y<0)pr={x:-pr.x,y:-pr.y};
+  [[q.Pp,c.P,1],[q.Qq,c.Q,-1]].forEach(function(z){var al=away(z[0],q.M,10);addPt(z[0],z[1],{x:pr.x*20+al.x-6,y:pr.y*20+al.y+9},function(){return segEnd(k+"draw2")})});
+});
+if(circ)addPt(O,"O",{x:12,y:-12},function(){return by.center.t0+200});
+
+/* zone côté U (découpage du rectangle par la médiatrice) */
+var ZP=null;
+if(CFG.zone&&!circ){
+  var q1=CON[0], u1=q1.u, Mz=q1.M, tx=u1.x, ty=u1.y;
+  var sd=function(p){return tx*(p.y-Mz.y)-ty*(p.x-Mz.x)}, sg0=sd(q1.U)>0?1:-1, rc=CFG.zone.rect;
+  var poly=[{x:rc[0],y:rc[1]},{x:rc[2],y:rc[1]},{x:rc[2],y:rc[3]},{x:rc[0],y:rc[3]}], out=[];
+  for(var zi=0;zi<poly.length;zi++){
+    var pa_=poly[zi], pb_=poly[(zi+1)%poly.length], da=sd(pa_)*sg0, db=sd(pb_)*sg0;
+    if(da>=0)out.push(pa_);
+    if((da>=0)!==(db>=0)){var tt_=da/(da-db);out.push({x:pa_.x+(pb_.x-pa_.x)*tt_,y:pa_.y+(pb_.y-pa_.y)*tt_})}
+  }
+  ZP=mk("g",{opacity:0},$("zoneG"));
+  mk("path",{d:out.map(function(p,i){return (i?"L":"M")+p.x.toFixed(1)+" "+p.y.toFixed(1)}).join("")+"Z",style:"fill:var(--circle);fill-opacity:.2"},ZP);
+  CFG.zone.label.forEach(function(tl,i){var e=lab(tl,CFG.zone.lx,CFG.zone.ly+i*26,"s",ZP);e.style.fill="var(--circle)";e.style.fontStyle="normal";e.style.fontWeight="600";e.style.fontSize="19px";e.style.fontFamily="var(--f-body)"});
+}
+/* repères de fin */
+var MK=$("marks"), RD=$("radii");
+if(!circ){
+  var q0=CON[0], e1={x:Math.cos(q0.dir*D),y:Math.sin(q0.dir*D)}, M=q0.M, uu=q0.u;
+  mk("circle",{cx:M.x,cy:M.y,r:4.5,style:"fill:var(--ink)"},MK);
+  lab("M",M.x+10,M.y+28,"",MK);
+  mk("path",{d:"M"+(M.x+14*e1.x)+" "+(M.y+14*e1.y)+"L"+(M.x+14*e1.x+14*uu.x)+" "+(M.y+14*e1.y+14*uu.y)+"L"+(M.x+14*uu.x)+" "+(M.y+14*uu.y),fill:"none","stroke-width":2.2,style:"stroke:var(--accent)"},MK);
+  [[q0.U,M],[M,q0.V]].forEach(function(z){var m={x:(z[0].x+z[1].x)/2,y:(z[0].y+z[1].y)/2};
+    mk("line",{x1:m.x-9*uu.x,y1:m.y-9*uu.y,x2:m.x+9*uu.x,y2:m.y+9*uu.y,"stroke-width":2.6,"stroke-linecap":"round",style:"stroke:var(--accent)"},MK)});
+}else{
+  ["A","B","C"].forEach(function(n){mk("line",{x1:O.x,y1:O.y,x2:P0[n].x,y2:P0[n].y,"stroke-dasharray":"7 6","stroke-width":2.2,"stroke-linecap":"round",style:"stroke:var(--circle)"},RD)});
+}
+
+/* règle */
+var tk=$("rticks");
+for(var i=0;i<=24;i++){
+  var x=i*24; mk("line",{x1:x,x2:x,y1:1,y2:i%5===0?16:10},tk);
+  if(i<24)mk("line",{x1:x+12,x2:x+12,y1:1,y2:6},tk);
+  if(i%2===0&&i>0){var tx=mk("text",{x:x,y:30,"text-anchor":"middle","font-size":10,stroke:"none",style:"fill:var(--ink)"},tk);tx.textContent=i}
+}
+var arcs=[]; S.forEach(function(s){if(s.draw){arcs.push({s:s,p:mk("path",{fill:"none"},s.circle?$("inkC"):$("ink"))})}});
+var bis=CON.map(function(){return mk("path",{fill:"none","stroke-width":3.4,"stroke-linecap":"round",style:"stroke:var(--accent)"},$("bisG"))});
+function arcPath(cn,r,a0,a1){var n=Math.max(2,Math.ceil(Math.abs(a1-a0)/2)),d="";for(var i=0;i<=n;i++){var q=pt(cn,r,lerp(a0,a1,i/n));d+=(i?"L":"M")+q.x.toFixed(1)+" "+q.y.toFixed(1)}return d}
+
+function compassAt(cc){
+  var Q={x:cc.Px+cc.r*Math.cos(cc.th*D),y:cc.Py+cc.r*Math.sin(cc.th*D)}, P={x:cc.Px,y:cc.Py};
+  var Mm={x:(P.x+Q.x)/2,y:(P.y+Q.y)/2}, pa=cc.ha*D;
+  var ux=Math.cos(pa), uy=Math.sin(pa)-.6, l=Math.hypot(ux,uy); ux/=l; uy/=l;
+  var H={x:Mm.x+ux*80,y:Mm.y+uy*80};
+  if(cc.cf>0){var Hc={x:P.x+.2*(Q.x-P.x),y:P.y+.2*(Q.y-P.y)-85};H={x:lerp(H.x,Hc.x,cc.cf),y:lerp(H.y,Hc.y,cc.cf)};ux=lerp(ux,0,cc.cf);uy=lerp(uy,-1,cc.cf);l=Math.hypot(ux,uy);ux/=l;uy/=l}
+  return {P:P,Q:Q,H:H,K:{x:H.x+ux*36,y:H.y+uy*36},u:{x:ux,y:uy}};
+}
+var el={}; ["legN","needle","legP","wood","lead","stem","hinge","shL1","shL2","compass","handR","handL","pencilG","ruler"].forEach(function(k){el[k]=$(k)});
+function rulerP(q,t){var r=by[q.k+"ruler"],cl=by[q.k+"clear"];if(t<r.t0)return 0;if(t<r.t0+r.d)return ease(prog(q.k+"ruler",t));if(t<cl.t0)return 1;if(t<cl.t0+cl.d)return 1-ease(prog(q.k+"clear",t));return 0}
+
+function render(t){
+  t=clamp(t,0,total-0.001);
+  var i=0; while(i<S.length-1&&t>=S[i].t0+S[i].d)i++;
+  var s=S[i], f=clamp((t-s.t0)/s.d,0,1), e=s.draw?sm(f):ease(f), p=s.from, q=s.to, prev=i?S[i-1]:null;
+  var cs={Px:lerp(p.Px,q.Px,e),Py:lerp(p.Py,q.Py,e),r:lerp(p.r,q.r,e),th:lerp(p.th,q.th,e),ha:lerp(p.ha,q.ha,e),cf:lerp(p.cf,q.cf,e)};
+  var g=compassAt(cs);
+  setL(el.legN,g.H,g.P); setL(el.legP,g.H,g.Q);
+  setL(el.needle,mix(g.H,g.P,.78),g.P);
+  setL(el.wood,mix(g.H,g.Q,.72),mix(g.H,g.Q,.93)); setL(el.lead,mix(g.H,g.Q,.93),g.Q);
+  setL(el.stem,g.H,g.K);
+  el.hinge.setAttribute("cx",g.H.x); el.hinge.setAttribute("cy",g.H.y);
+  setL(el.shL1,{x:g.H.x+9,y:g.H.y+11},{x:g.P.x+9,y:g.P.y+11}); setL(el.shL2,{x:g.H.x+9,y:g.H.y+11},{x:g.Q.x+9,y:g.Q.y+11});
+  var ca=1;
+  if(s.hide)ca=/ruler$/.test(s.id)?1-clamp(f/.6,0,1):0;
+  else if(prev&&prev.hide)ca=ease(clamp(f/.4,0,1));
+  el.compass.setAttribute("opacity",ca); el.handR.setAttribute("opacity",ca);
+  el.handR.setAttribute("transform","translate("+g.K.x.toFixed(1)+" "+g.K.y.toFixed(1)+") rotate("+(Math.atan2(g.u.x,-g.u.y)/D*.75).toFixed(1)+")");
+  arcs.forEach(function(a){var ff=prog(a.s.id,t);a.p.setAttribute("d",ff<=0?"":arcPath({x:a.s.to.Px,y:a.s.to.Py},a.s.to.r,a.s.from.th,lerp(a.s.from.th,a.s.to.th,sm(ff))))});
+  PTS.forEach(function(o){o.g.setAttribute("opacity",clamp((t-o.at())/350,0,1))});
+  /* règle, droites, crayon */
+  var act=null, rp=0, pa=0, T=null;
+  CON.forEach(function(c){
+    var r=rulerP(c,t); if(r>0){act=c;rp=r}
+    var rl=by[c.k+"ruler"], ln=by[c.k+"line"], cl=by[c.k+"clear"], len=0;
+    if(t>=ln.t0)len=c.len*(t<ln.t0+ln.d?ease(prog(c.k+"line",t)):1);
+    var tip=pt(c.S,len,c.tb);
+    bis[c.k].setAttribute("d",len>0?"M"+c.S.x.toFixed(1)+" "+c.S.y.toFixed(1)+"L"+tip.x.toFixed(1)+" "+tip.y.toFixed(1):"");
+    if(t>=rl.t0&&t<cl.t0+cl.d){
+      if(t<rl.t0+rl.d){var pf=clamp((prog(c.k+"ruler",t)-.4)/.6,0,1);pa=pf;T={x:c.S.x,y:c.S.y-40*(1-ease(pf))}}
+      else if(t<cl.t0){pa=1;T=tip}
+      else{var cf=ease(prog(c.k+"clear",t));pa=1-cf;T={x:tip.x,y:tip.y-50*cf}}
+    }
+  });
+  if(act){el.ruler.setAttribute("opacity",clamp(rp*1.4,0,1));el.ruler.setAttribute("transform","translate("+(act.origin.x+(1-rp)*240)+" "+(act.origin.y+(1-rp)*170)+") rotate("+act.rot+")")}
+  else el.ruler.setAttribute("opacity",0);
+  /* main gauche */
+  var lc=CON[s.kc], lrp=(act&&act.k===lc.k)?rp:0;
+  var lx=lerp(lc.lrest.x,lc.press.x,lrp), ly=lerp(lc.lrest.y,lc.press.y,lrp), lr=lerp(0,lc.rot,lrp), la=1;
+  if(s.hand==="off")la=0;
+  else if(/clear$/.test(s.id))la=1-ease(f);
+  else if(prev&&(/clear$/.test(prev.id)||prev.hand==="off"))la=ease(clamp(f/.8,0,1));
+  el.handL.setAttribute("transform","translate("+lx.toFixed(1)+" "+ly.toFixed(1)+") rotate("+lr.toFixed(1)+")");
+  el.handL.setAttribute("opacity",la);
+  el.pencilG.setAttribute("opacity",pa);
+  if(T)el.pencilG.setAttribute("transform","translate("+T.x.toFixed(1)+" "+T.y.toFixed(1)+") rotate(8)");
+  var fin=t>=by.final.t0?ease(clamp((t-by.final.t0)/700,0,1)):0;
+  MK.setAttribute("opacity",fin); RD.setAttribute("opacity",fin);
+  if(ZP)ZP.setAttribute("opacity",t>=by.zone.t0?ease(clamp((t-by.zone.t0)/1200,0,1)):0);
+  caption(s,t);
+  $("seek").value=Math.round(t/total*1000);
+}
+var lastSeg=null;
+function caption(s,t){
+  if(lastSeg!==s){
+    lastSeg=s; var k=STEPS[s.n];
+    $("badge").textContent=k.badge; $("title").textContent=k.title; $("text").textContent=k.text; $("gesture").textContent=s.g;
+    var cs=$("chips").children; for(var i=0;i<cs.length;i++){cs[i].classList.toggle("on",i===s.n);cs[i].setAttribute("aria-current",i===s.n?"step":"false")}
+  }
+  $("why").hidden=!(t>=by.final.t0);
+}
+var chips=$("chips");
+STEPS.forEach(function(k,n){
+  var bt=document.createElement("button"); bt.type="button"; bt.className="chip";
+  bt.innerHTML="<b>"+(n+1)+"</b><span></span>"; bt.lastChild.textContent=k.chip;
+  bt.addEventListener("click",function(){var first=S.filter(function(s){return s.n===n})[0];time=first.t0;render(time)});
+  chips.appendChild(bt);
+});
+var time=0, playing=!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches), speed=1, last=0, play=$("play");
+function label(){play.textContent=time>=total-1&&!loopOn?"Rejouer":(playing?"Pause":"Lecture")}
+function frame(ts){if(playing){time+=(ts-last)*speed;if(time>=total){if(loopOn){if(!endAt)endAt=ts;if(ts-endAt>2200){time=0;endAt=0}else time=total-2}else{time=total;playing=false}}}last=ts;render(time);label();requestAnimationFrame(frame)}
+play.addEventListener("click",function(){if(time>=total-1){time=0;playing=true}else playing=!playing;label()});
+$("restart").addEventListener("click",function(){time=0;playing=true;label()});
+$("seek").addEventListener("input",function(){playing=false;time=$("seek").value/$("seek").max*total;render(time);label()});
+$("speed").addEventListener("change",function(){speed=parseFloat($("speed").value)});
+var loopOn=false,endAt=0,loopBtn=$("loop");
+loopBtn.addEventListener("click",function(){loopOn=!loopOn;loopBtn.setAttribute("aria-pressed",loopOn?"true":"false");loopBtn.textContent=loopOn?"Boucle : oui":"Boucle : non";endAt=0;if(loopOn&&!playing&&time>=total-1){time=0;playing=true}label()});
+requestAnimationFrame(function(ts){last=ts;frame(ts)});
+render(0); label();
+})();
+</script>
+</body>
+</html>
