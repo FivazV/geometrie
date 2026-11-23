@@ -24,19 +24,38 @@ import { fileURLToPath } from 'node:url';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const SORTIE = resolve(ICI, 'docs');
-const VERSION = '2026-11-23b';
+const VERSION = '2026-11-23c';
 
 const TUILES = [
 	{
 		nom: 'ESPACE',
 		page: 'espace.html',
-		texte: 'Les constructions au compas, pas à pas.',
+		texte: 'Les constructions pas à pas, et les corrections de la remédiation.',
 		dossier: 'E:/Ecole/Espace/Application',
-		animations: [
-			{ source: 'Mediatrice_au_compas_1.html', fichier: 'mediatrice.html' },
-			{ source: 'Bissectrice_au_compas_1.html', fichier: 'bissectrice.html' },
-			{ source: 'Cercle_circonscrit_au_compas_1.html', fichier: 'cercle-circonscrit.html' },
-			{ source: 'Cercle_inscrit_au_compas_1.html', fichier: 'cercle-inscrit.html' }
+		// Une tuile range ses animations en RUBRIQUES. `numero` : le numéro de l'exercice, écrit devant l'intitulé
+		// (deux exercices de remédiation portent le même titre que les animations de la première rubrique).
+		rubriques: [
+			{
+				titre: 'Les constructions au compas',
+				animations: [
+					{ source: 'Mediatrice_au_compas_1.html', fichier: 'mediatrice.html' },
+					{ source: 'Bissectrice_au_compas_1.html', fichier: 'bissectrice.html' },
+					{ source: 'Cercle_circonscrit_au_compas_1.html', fichier: 'cercle-circonscrit.html' },
+					{ source: 'Cercle_inscrit_au_compas_1.html', fichier: 'cercle-inscrit.html' }
+				]
+			},
+			{
+				titre: 'Remédiation — les corrections',
+				animations: [
+					{ numero: 1, source: 'Correction_Remediation_1_Bissectrice.html', fichier: 'remediation-1.html' },
+					{ numero: 2, source: 'Correction_Remediation_2_Mediatrice.html', fichier: 'remediation-2.html' },
+					{ numero: 3, source: 'Correction_Remediation_3_Cercle_circonscrit.html', fichier: 'remediation-3.html' },
+					{ numero: 4, source: 'Correction_Remediation_4_Cercle_inscrit.html', fichier: 'remediation-4.html' },
+					{ numero: 5, source: 'Correction_Remediation_5_Calcul_angles.html', fichier: 'remediation-5.html' },
+					{ numero: 6, source: 'Correction_Remediation_6_Constructions_figures.html', fichier: 'remediation-6.html' },
+					{ numero: 7, source: 'Correction_Remediation_7_Qui_suis_je.html', fichier: 'remediation-7.html' }
+				]
+			}
 		]
 	}
 ];
@@ -144,7 +163,9 @@ ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
 .tuiles a{display:block;background:var(--bleu);color:var(--sur-bleu);border-radius:18px;padding:26px 22px;text-decoration:none}
 .tuiles strong{display:block;font:700 1.9rem/1.1 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;letter-spacing:.04em}
 .tuiles span{display:block;margin-top:6px;opacity:.9}
-.liste a{display:block;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:16px 18px;color:var(--bleu);text-decoration:none;font:700 1.15rem/1.3 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif}
+h2{font:700 1.15rem/1.3 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;margin:26px 0 10px;color:var(--doux)}
+.liste a{display:flex;align-items:center;gap:12px;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:16px 18px;color:var(--bleu);text-decoration:none;font:700 1.15rem/1.3 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif}
+.numero{flex:none;width:32px;height:32px;border-radius:50%;background:var(--bleu);color:var(--sur-bleu);display:grid;place-items:center;font-size:1rem}
 .liste a:active{background:var(--bleu-doux)}
 .retour{display:inline-block;margin-top:14px;padding:8px 14px;border-radius:999px;background:var(--bleu);color:var(--sur-bleu);font:600 15px/1 system-ui,sans-serif;text-decoration:none}
 details{margin-top:26px;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:14px 18px}
@@ -195,9 +216,19 @@ const domaine = (t, intitules) =>
 <header>
 <div><h1>${t.nom}</h1><p>${echapper(t.texte)}</p></div>
 </header>
+${t.rubriques
+	.map(
+		(r) => `<h2>${echapper(r.titre)}</h2>
 <ul class="liste">
-${t.animations.map((a, i) => `<li><a href="${a.fichier}">${echapper(intitules[i])}</a></li>`).join('\n')}
+${r.animations
+	.map(
+		(a) =>
+			`<li><a href="${a.fichier}">${a.numero ? `<span class="numero">${a.numero}</span>` : ''}<span class="intitule">${echapper(intitules.get(a.fichier))}</span></a></li>`
+	)
+	.join('\n')}
 </ul>`
+	)
+	.join('\n')}`
 	);
 
 const manifeste = () =>
@@ -283,10 +314,13 @@ for (const [nom, taille, marge] of [
 
 const pages = ['index.html'];
 for (const t of TUILES) {
-	const intitules = t.animations.map((a) => animation(t, a));
+	const animations = t.rubriques.flatMap((r) => r.animations);
+	const intitules = new Map(animations.map((a) => [a.fichier, animation(t, a)]));
 	writeFileSync(resolve(SORTIE, t.page), domaine(t, intitules));
-	pages.push(t.page, ...t.animations.map((a) => a.fichier));
-	console.log(`${t.nom} :\n  - ${intitules.join('\n  - ')}`);
+	pages.push(t.page, ...animations.map((a) => a.fichier));
+	console.log(
+		`${t.nom} :\n${animations.map((a) => `  - ${a.numero ? a.numero + ' · ' : ''}${intitules.get(a.fichier)}`).join('\n')}`
+	);
 }
 if (new Set(pages).size !== pages.length) throw new Error('deux pages portent le même nom de fichier');
 writeFileSync(resolve(SORTIE, 'index.html'), accueil());

@@ -76,7 +76,10 @@ for (const tuile of tuiles) {
 	if ((await debordement()) > 2) problemes.push(`${tuile.href} : défilement horizontal`);
 	toutes.push(tuile.href);
 	const animations = await page.locator('.liste a').evaluateAll((as) =>
-		as.map((a) => ({ href: a.getAttribute('href'), intitule: a.textContent.trim() }))
+		as.map((a) => ({
+			href: a.getAttribute('href'),
+			intitule: a.querySelector('.intitule').textContent.trim()
+		}))
 	);
 	if (!animations.length) problemes.push(`${tuile.nom} : aucune animation`);
 	console.log(`${tuile.nom} : ${animations.length} animations`);

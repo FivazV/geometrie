@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:light}body{margin:0}</style>
+<title>Qui suis-je ?</title>
+<style>
+/* Layout: une scène de papier quadrillé vue du dessus, puis une carte de légende et les commandes. */
+:root{
+  --desk:#dde4ea; --paper:#fdfdfb; --grid:#d5e0ec; --grid-major:#b4c4d8;
+  --ink:#1d2733; --muted:#566272; --line:#c3ceda;
+  --accent:#e0452b; --circle:#17825f; --construct:#2563a8;
+  --card:#f3f6f9; --chip:#e6ecf2; --chip-on:#1d2733; --chip-on-fg:#ffffff;
+  --ruler:rgba(150,196,230,.74); --ruler-edge:#5f8fb5;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-math:"Newsreader","Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --desk:#12171c; --paper:#232b33; --grid:#2d3843; --grid-major:#3d4b5a;
+  --ink:#e8edf2; --muted:#9aa8b6; --line:#35414d;
+  --accent:#ff6b4f; --circle:#4fd1a1; --construct:#6fb0f0;
+  --card:#1a2027; --chip:#252e37; --chip-on:#e8edf2; --chip-on-fg:#12171c;
+  --ruler:rgba(120,170,210,.55); --ruler-edge:#8fb8d8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#12171c; --paper:#232b33; --grid:#2d3843; --grid-major:#3d4b5a;
+  --ink:#e8edf2; --muted:#9aa8b6; --line:#35414d;
+  --accent:#ff6b4f; --circle:#4fd1a1; --construct:#6fb0f0;
+  --card:#1a2027; --chip:#252e37; --chip-on:#e8edf2; --chip-on-fg:#12171c;
+  --ruler:rgba(120,170,210,.55); --ruler-edge:#8fb8d8; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.1;margin:0;text-wrap:balance}
+.sub{margin:4px 0 0;color:var(--muted);max-width:60ch}
+.stage{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--paper);box-shadow:0 10px 30px rgba(10,20,30,.14)}
+.stage svg{display:block;width:100%;height:auto}
+.lbl{font-family:var(--f-math);font-style:italic;font-weight:500;font-size:26px;fill:var(--ink)}
+.lbl.s{font-size:22px}
+.lbl.c{fill:var(--construct)}
+.lbl.r{fill:var(--accent)}
+.panel{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.panel>.card:first-child{min-height:330px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.badge{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card h2{font-family:var(--f-display);font-size:1.3rem;line-height:1.2;margin:4px 0 6px;text-wrap:balance}
+.card p{margin:0 0 8px}
+.gesture{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-weight:500}
+.gesture::before{content:"";flex:none;width:10px;height:10px;margin-top:7px;border-radius:50%;background:var(--accent)}
+.why{margin-top:10px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);font-size:.92rem;color:var(--muted)}
+.why[hidden]{display:none}
+.ctrl{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select{font:inherit;color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600}
+.btn.main{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on);min-width:7.5rem}
+.btn:focus-visible,.chip:focus-visible,select:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--construct);outline-offset:2px}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:8px 12px;cursor:pointer;min-width:0}
+.chip b{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--paper);border:1px solid var(--line);font-size:.8rem}
+.chip.on{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on)}
+.chip.on b{background:var(--accent);border-color:var(--accent);color:#fff}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.speed{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.9rem}
+select{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+@media (max-width:720px){.panel{grid-template-columns:minmax(0,1fr)}}
+.btn[aria-pressed="true"]{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on)}
+.td,.x,.pl{fill:none;stroke-linecap:round;stroke-linejoin:round}.td{stroke-width:3.2}.td.th{stroke-width:2.2}.x{stroke-width:2.6}.pl{stroke-width:3}.pl.th{stroke-width:2}
+.sc{stroke:var(--construct)}.sg{stroke:var(--circle)}.so{stroke:var(--orange)}.sa{stroke:var(--accent)}.sk{stroke:var(--ink)}.sm{stroke:var(--muted)}.ds{stroke-dasharray:7 6}
+.fg{fill:var(--circle);fill-opacity:.16;stroke:none}.fc{fill:var(--construct);fill-opacity:.14;stroke:none}.fa{fill:var(--accent);fill-opacity:.12;stroke:none}.fk{fill:var(--ink);fill-opacity:.05;stroke:none}
+.dot{fill:var(--ink)}.dotc{fill:var(--construct)}.dota{fill:var(--accent)}
+.lbl.ta{fill:var(--accent)}.lbl.tc{fill:var(--construct)}.lbl.tg{fill:var(--circle)}.lbl.to{fill:var(--orange)}
+.eq{font-family:var(--f-math);font-size:27px;fill:var(--ink)}.eq.r{fill:var(--accent);font-weight:600}.eq.h{font-family:var(--f-display);font-size:23px;font-weight:700;fill:var(--construct)}
+.note{font-family:var(--f-body);font-size:21px;fill:var(--muted)}.big{font-family:var(--f-display);font-size:34px;font-weight:700;fill:var(--accent)}.clue{font-family:var(--f-display);font-size:25px;font-weight:600;fill:var(--ink)}
+:root{--orange:#d97706}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--orange:#f0a03c}}:root[data-theme="dark"]{--orange:#f0a03c}
+</style>
+<link rel="stylesheet" href="polices/polices.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d4e89">
+<link rel="icon" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Géométrie">
+</head>
+<body>
+<div style="padding:12px 16px 0"><a href="espace.html" style="display:inline-block;padding:8px 14px;border-radius:999px;background:#1d4e89;color:#fff;font:600 15px/1 system-ui,sans-serif;text-decoration:none">← Espace</a></div>
+
+<div class="wrap">
+  <header>
+    <h1>Qui suis-je ?</h1>
+    <p class="sub">On dessine la figure, puis on met en évidence chaque affirmation de la devinette. Tu peux mettre en pause, avancer à la main ou sauter à une devinette.</p>
+  </header>
+
+  <div class="stage">
+  <svg id="scene" viewBox="0 0 900 600" role="img" aria-label="Animation : quatre devinettes de géométrie, figures dessinées et affirmations mises en évidence.">
+    <defs>
+      <pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" style="stroke:var(--grid)" stroke-width="1"/></pattern>
+      <pattern id="g5" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" style="stroke:var(--grid-major)" stroke-width="1.2"/></pattern>
+      <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d6b8"/><stop offset=".6" stop-color="#e5b48d"/><stop offset="1" stop-color="#d49b74"/></linearGradient>
+      <linearGradient id="skinD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dfae88"/><stop offset="1" stop-color="#c58d68"/></linearGradient>
+      <linearGradient id="sleeve" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6283a3"/><stop offset=".55" stop-color="#4c6c8c"/><stop offset="1" stop-color="#3a5570"/></linearGradient>
+      <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3e8ee"/><stop offset=".5" stop-color="#a9b2bd"/><stop offset="1" stop-color="#7c8793"/></linearGradient>
+      <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.2"/></filter>
+    </defs>
+
+    <rect width="900" height="600" style="fill:var(--paper)"/>
+    <rect width="900" height="600" fill="url(#g1)"/>
+    <rect width="900" height="600" fill="url(#g5)"/>
+
+    <g id="gBase"></g><g id="gDraw"></g><g id="gTop"></g><g id="gSpr"></g>
+    <!-- règle -->
+    <g id="ruler" opacity="0">
+      <rect x="-70" y="1" width="640" height="46" rx="5" fill="rgba(0,0,0,.2)" filter="url(#soft)" transform="translate(6 9)"/>
+      <rect x="-70" y="0" width="640" height="46" rx="5" style="fill:var(--ruler);stroke:var(--ruler-edge)" stroke-width="1.5"/>
+      <g id="rticks" style="stroke:var(--ruler-edge)" stroke-width="1.2"></g>
+    </g>
+
+    <!-- compas -->
+    <g id="compass">
+      <g id="cShadow" filter="url(#soft)" opacity=".5">
+        <line id="shL1" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+        <line id="shL2" stroke="#000" stroke-width="8" stroke-linecap="round"/>
+      </g>
+      <line id="legN" stroke="url(#metal)" stroke-width="11" stroke-linecap="round"/>
+      <line id="needle" stroke="#59636e" stroke-width="2.4" stroke-linecap="round"/>
+      <line id="legP" stroke="url(#metal)" stroke-width="11" stroke-linecap="round"/>
+      <line id="wood" stroke="#e0b48a" stroke-width="12" stroke-linecap="butt"/>
+      <line id="lead" stroke="#2f343a" stroke-width="3.4" stroke-linecap="round"/>
+      <line id="stem" stroke="#8c96a1" stroke-width="7" stroke-linecap="round"/>
+      <circle id="hinge" r="13" fill="url(#metal)" stroke="#6b7580" stroke-width="1.5"/>
+    </g>
+
+    <!-- crayon (étape 4) -->
+    <g id="pencilG" opacity="0">
+      <g id="pencilBody">
+        <path d="M0,0 L-5.5,-24 L5.5,-24Z" fill="#e0b48a"/>
+        <path d="M0,0 L-1.9,-8 L1.9,-8Z" fill="#2f343a"/>
+        <rect x="-5.5" y="-210" width="11" height="186" fill="#d4472d"/>
+        <rect x="-5.5" y="-210" width="3.5" height="186" fill="rgba(255,255,255,.28)"/>
+        <rect x="-5.5" y="-60" width="11" height="6" fill="rgba(0,0,0,.18)"/>
+      </g>
+      <use href="#handPinch" transform="translate(0 -62) scale(.8)"/>
+    </g>
+
+    <defs>
+      <!-- main droite en pince, vue de dessus : pointe des doigts en (0,0), bras vers le haut -->
+      <g id="handPinch" stroke="rgba(110,64,36,.42)" stroke-width="1.5" stroke-linejoin="round">
+        <path d="M-36,-188 L-42,-340 L46,-340 L40,-188Z" fill="url(#skin)" stroke="none"/>
+        <circle cx="0" cy="5" r="8.5" fill="#97a1ac" stroke="#5c6670"/>
+        <path d="M-60,-92 C-66,-72 -62,-54 -54,-46 C-46,-42 -40,-48 -42,-58 C-42,-70 -42,-80 -42,-92Z" fill="url(#skinD)"/>
+        <path d="M-78,-94 C-82,-80 -78,-66 -72,-60 C-66,-56 -62,-62 -62,-70 C-62,-78 -62,-86 -62,-94Z" fill="url(#skinD)"/>
+        <path d="M-42,-90 C-48,-66 -44,-44 -34,-34 C-26,-28 -20,-36 -22,-48 C-22,-62 -22,-80 -22,-92Z" fill="url(#skinD)"/>
+        <path d="M52,-112 C64,-84 50,-50 26,-18 C16,-6 8,0 3,-4 C0,-12 8,-24 14,-34 C22,-48 26,-70 22,-96Z" fill="url(#skin)"/>
+        <path d="M-78,-92 C-86,-130 -62,-170 -36,-190 L40,-190 C64,-166 72,-126 56,-100 C54,-90 40,-88 22,-92Z" fill="url(#skin)"/>
+        <path d="M-22,-92 C-26,-60 -20,-28 -13,-6 C-11,1 -3,3 2,-2 C8,-14 8,-52 6,-92Z" fill="url(#skin)"/>
+        <ellipse cx="-4" cy="-13" rx="5.5" ry="8.5" transform="rotate(8 -4 -13)" fill="rgba(255,238,228,.72)"/>
+        <g fill="rgba(255,255,255,.26)" stroke="none"><ellipse cx="-62" cy="-100" rx="7" ry="4.5"/><ellipse cx="-36" cy="-104" rx="7" ry="4.5"/><ellipse cx="-12" cy="-102" rx="7" ry="4.5"/><ellipse cx="14" cy="-98" rx="6" ry="4"/></g>
+        <g fill="none" stroke="rgba(150,90,60,.2)"><path d="M-48,-108 C-42,-140 -38,-165 -30,-184"/><path d="M-24,-108 C-18,-140 -10,-165 -4,-186"/><path d="M2,-104 C8,-140 14,-165 20,-186"/></g>
+        <path d="M-58,-240 L-70,-352 L76,-352 L62,-240 C22,-228 -22,-228 -58,-240Z" fill="url(#sleeve)" stroke="rgba(0,0,0,.2)"/>
+        <path d="M-58,-240 C-22,-228 22,-228 62,-240" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="2.4"/>
+      </g>
+      <!-- main gauche à plat, doigts vers le haut -->
+      <g id="handFlat" stroke="rgba(110,64,36,.42)" stroke-width="1.5" stroke-linejoin="round">
+        <path d="M-36,40 L-42,340 L44,340 L38,40Z" fill="url(#skin)" stroke="none"/>
+        <rect x="-52" y="-96" width="20" height="86" rx="10" fill="url(#skin)"/>
+        <rect x="-30" y="-116" width="22" height="106" rx="11" fill="url(#skin)"/>
+        <rect x="-6" y="-124" width="22" height="114" rx="11" fill="url(#skin)"/>
+        <rect x="18" y="-112" width="22" height="102" rx="11" fill="url(#skin)"/>
+        <rect x="-11" y="-50" width="23" height="70" rx="11.5" transform="translate(58 4) rotate(36)" fill="url(#skin)"/>
+        <rect x="-54" y="-46" width="108" height="104" rx="30" fill="url(#skin)"/>
+        <g fill="rgba(255,238,228,.7)" stroke="none"><ellipse cx="-42" cy="-84" rx="6" ry="8"/><ellipse cx="-19" cy="-104" rx="6.5" ry="8.5"/><ellipse cx="5" cy="-112" rx="6.5" ry="8.5"/><ellipse cx="29" cy="-100" rx="6.5" ry="8.5"/></g>
+        <g fill="none" stroke="rgba(150,90,60,.2)"><path d="M-30,-20 C-30,0 -30,20 -26,40"/><path d="M-6,-20 C-6,0 -6,20 -4,40"/><path d="M18,-20 C18,0 18,20 14,40"/></g>
+        <path d="M-52,110 L-64,340 L70,340 L56,110 C20,122 -20,122 -52,110Z" fill="url(#sleeve)" stroke="rgba(0,0,0,.2)"/>
+        <path d="M-52,110 C-20,122 20,122 56,110" fill="none" stroke="rgba(0,0,0,.3)" stroke-width="2.4"/>
+      </g>
+    </defs>
+
+    <g id="handR"><use href="#handPinch" transform="scale(.8)"/></g>
+    <g id="handL" opacity="1"><use href="#handFlat" transform="scale(.8)"/></g>
+  </svg>
+  </div>
+
+  <div class="panel">
+    <section class="card" aria-live="polite">
+      <div class="badge" id="badge">Départ</div>
+      <h2 id="title">L'angle de départ</h2>
+      <p id="text">On veut partager l'angle xOy en deux angles égaux, avec un compas, une règle et un crayon.</p>
+      <div class="gesture" id="gesture">Le compas est prêt.</div>
+      <div class="why" id="why" hidden><strong>À retenir.</strong> Losange : quatre côtés égaux, diagonales perpendiculaires. Triangle isocèle : deux côtés égaux et deux angles égaux. Rectangle : quatre angles droits, côtés opposés égaux. Trapèze isocèle : deux côtés parallèles et deux côtés non parallèles égaux.</div>
+    </section>
+
+    <section class="card ctrl" aria-label="Commandes">
+      <div class="row">
+        <button class="btn main" id="play" type="button">Pause</button>
+        <button class="btn" id="restart" type="button">Recommencer</button>
+        <button class="btn" id="loop" type="button" aria-pressed="false">Boucle : non</button>
+      </div>
+      <label class="speed" for="seek">Avancer à la main
+        <input id="seek" type="range" min="0" max="1000" value="0" step="1">
+      </label>
+      <div class="chips" id="chips"></div>
+      <div class="speed"><label for="speed">Vitesse</label>
+        <select id="speed"><option value="0.6">Lente</option><option value="1" selected>Normale</option><option value="1.5">Rapide</option></select>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var NS="http://www.w3.org/2000/svg",D=Math.PI/180,CFG={"steps": [{"badge": "Départ", "title": "Qui suis-je ?", "text": "Quatre devinettes de géométrie. Pour chacune, on dessine la figure puis on vérifie chaque affirmation l’une après l’autre.", "chip": "Les devinettes", "reset": false}, {"badge": "Devinette a", "title": "a) Qui suis-je ?", "text": "« J’ai quatre côtés de même longueur. Mes diagonales sont perpendiculaires, mais je n’ai pas d’angle droit. » On dessine un quadrilatère aux quatre côtés égaux et on vérifie chaque affirmation.", "chip": "a) Le losange", "reset": true}, {"badge": "Devinette b", "title": "b) Qui suis-je ?", "text": "« J’ai trois côtés, dont deux de même longueur. Deux de mes angles sont égaux. » On dessine un triangle ayant deux côtés égaux et on vérifie chaque affirmation.", "chip": "b) Le triangle isocèle", "reset": true}, {"badge": "Devinette c", "title": "c) Qui suis-je ?", "text": "« J’ai quatre angles droits et mes côtés opposés sont égaux, mais mes quatre côtés ne sont pas tous égaux. » On dessine un quadrilatère à angles droits dont les côtés ne sont pas tous égaux, et on vérifie chaque affirmation.", "chip": "c) Le rectangle", "reset": true}, {"badge": "Devinette d", "title": "d) Qui suis-je ?", "text": "« J’ai quatre côtés. Seuls deux de mes côtés sont parallèles et les deux autres ont la même longueur. » On dessine un quadrilatère avec deux côtés parallèles et deux côtés égaux, et on vérifie chaque affirmation.", "chip": "d) Le trapèze isocèle", "reset": true}], "items": [{"id": "s0_i1", "k": "text", "step": 0, "x": 450, "y": 200, "txt": "a) Le losange", "cls": "eq h", "z": 1, "anc": "middle"}, {"id": "s0_i2", "k": "text", "step": 0, "x": 450, "y": 260, "txt": "b) Le triangle isocèle", "cls": "eq h", "z": 1, "anc": "middle"}, {"id": "s0_i3", "k": "text", "step": 0, "x": 450, "y": 320, "txt": "c) Le rectangle", "cls": "eq h", "z": 1, "anc": "middle"}, {"id": "s0_i4", "k": "text", "step": 0, "x": 450, "y": 380, "txt": "d) Le trapèze isocèle", "cls": "eq h", "z": 1, "anc": "middle"}, {"id": "s1_side0", "k": "path", "step": 1, "d": "M450.0 180.0L650.0 300.0", "cls": "pl sk", "z": 0}, {"id": "s1_side1", "k": "path", "step": 1, "d": "M650.0 300.0L450.0 420.0", "cls": "pl sk", "z": 0}, {"id": "s1_side2", "k": "path", "step": 1, "d": "M450.0 420.0L250.0 300.0", "cls": "pl sk", "z": 0}, {"id": "s1_side3", "k": "path", "step": 1, "d": "M250.0 300.0L450.0 180.0", "cls": "pl sk", "z": 0}, {"id": "s1_vA", "k": "text", "step": 1, "x": 450, "y": 166, "txt": "A", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s1_vB", "k": "text", "step": 1, "x": 674, "y": 308, "txt": "B", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s1_vC", "k": "text", "step": 1, "x": 450, "y": 450, "txt": "C", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s1_vD", "k": "text", "step": 1, "x": 226, "y": 308, "txt": "D", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s1_c1", "k": "text", "step": 1, "x": 450, "y": 62, "txt": "Indice 1 : j’ai quatre côtés de même longueur.", "cls": "clue", "z": 1, "anc": "middle", "off": "s1_c2"}, {"id": "s1_c2", "k": "text", "step": 1, "x": 450, "y": 62, "txt": "Indice 2 : mes diagonales sont perpendiculaires,", "cls": "clue", "z": 1, "anc": "middle", "off": "s1_c3"}, {"id": "s1_c3", "k": "text", "step": 1, "x": 450, "y": 62, "txt": "Indice 3 : mais je n’ai pas d’angle droit.", "cls": "clue", "z": 1, "anc": "middle", "off": "s1_c4"}, {"id": "s1_h0", "k": "path", "step": 1, "d": "M450.0 180.0L650.0 300.0", "cls": "pl sa", "z": 1}, {"id": "s1_k0", "k": "path", "step": 1, "d": "M554.6 232.3L545.4 247.7", "cls": "x sa", "z": 1}, {"id": "s1_h1", "k": "path", "step": 1, "d": "M650.0 300.0L450.0 420.0", "cls": "pl sa", "z": 1}, {"id": "s1_k1", "k": "path", "step": 1, "d": "M554.6 367.7L545.4 352.3", "cls": "x sa", "z": 1}, {"id": "s1_h2", "k": "path", "step": 1, "d": "M450.0 420.0L250.0 300.0", "cls": "pl sa", "z": 1}, {"id": "s1_k2", "k": "path", "step": 1, "d": "M345.4 367.7L354.6 352.3", "cls": "x sa", "z": 1}, {"id": "s1_h3", "k": "path", "step": 1, "d": "M250.0 300.0L450.0 180.0", "cls": "pl sa", "z": 1}, {"id": "s1_k3", "k": "path", "step": 1, "d": "M345.4 232.3L354.6 247.7", "cls": "x sa", "z": 1}, {"id": "s1_d1", "k": "path", "step": 1, "d": "M450.0 180.0L450.0 420.0", "cls": "pl sc ds", "z": 1}, {"id": "s1_d2", "k": "path", "step": 1, "d": "M650.0 300.0L250.0 300.0", "cls": "pl sc ds", "z": 1}, {"id": "s1_ra", "k": "path", "step": 1, "d": "M450.0 282.0L468.0 282.0L468.0 300.0", "cls": "x sc", "z": 1}, {"id": "s1_n1", "k": "text", "step": 1, "x": 462, "y": 258, "txt": "≈ 120°", "cls": "lbl s to", "z": 1, "anc": "start"}, {"id": "s1_n2", "k": "text", "step": 1, "x": 462, "y": 355, "txt": "≈ 120°", "cls": "lbl s to", "z": 1, "anc": "start"}, {"id": "s1_n3", "k": "text", "step": 1, "x": 582, "y": 292, "txt": "≈ 60°", "cls": "lbl s to", "z": 1, "anc": "middle"}, {"id": "s1_n4", "k": "text", "step": 1, "x": 318, "y": 292, "txt": "≈ 60°", "cls": "lbl s to", "z": 1, "anc": "middle"}, {"id": "s1_ans", "k": "text", "step": 1, "x": 450, "y": 560, "txt": "Je suis un losange", "cls": "big", "z": 1, "anc": "middle"}, {"id": "s2_side0", "k": "path", "step": 2, "d": "M450.0 130.0L270.0 470.0", "cls": "pl sk", "z": 0}, {"id": "s2_side1", "k": "path", "step": 2, "d": "M270.0 470.0L630.0 470.0", "cls": "pl sk", "z": 0}, {"id": "s2_side2", "k": "path", "step": 2, "d": "M630.0 470.0L450.0 130.0", "cls": "pl sk", "z": 0}, {"id": "s2_vA", "k": "text", "step": 2, "x": 450, "y": 116, "txt": "A", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s2_vB", "k": "text", "step": 2, "x": 246, "y": 494, "txt": "B", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s2_vC", "k": "text", "step": 2, "x": 654, "y": 494, "txt": "C", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s2_c1", "k": "text", "step": 2, "x": 450, "y": 62, "txt": "Indice 1 : j’ai trois côtés, dont deux de même longueur.", "cls": "clue", "z": 1, "anc": "middle", "off": "s2_c2"}, {"id": "s2_c2", "k": "text", "step": 2, "x": 450, "y": 62, "txt": "Indice 2 : deux de mes angles sont égaux.", "cls": "clue", "z": 1, "anc": "middle", "off": "s2_c3"}, {"id": "s2_h1", "k": "path", "step": 2, "d": "M450.0 130.0L270.0 470.0", "cls": "pl sa", "z": 1}, {"id": "s2_h2", "k": "path", "step": 2, "d": "M450.0 130.0L630.0 470.0", "cls": "pl sa", "z": 1}, {"id": "s2_k1", "k": "path", "step": 2, "d": "M368.0 304.2L352.0 295.8", "cls": "x sa", "z": 1}, {"id": "s2_k2", "k": "path", "step": 2, "d": "M548.0 295.8L532.0 304.2", "cls": "x sa", "z": 1}, {"id": "s2_g1", "k": "path", "step": 2, "d": "M325.0 470.0A55 55 0 0 0 295.7 421.4", "cls": "x sc", "z": 1}, {"id": "s2_g2", "k": "path", "step": 2, "d": "M604.3 421.4A55 55 0 0 0 575.0 470.0", "cls": "x sc", "z": 1}, {"id": "s2_g1b", "k": "path", "step": 2, "d": "M333.0 470.0A63 63 0 0 0 299.5 414.3", "cls": "x sc", "z": 1}, {"id": "s2_g2b", "k": "path", "step": 2, "d": "M600.5 414.3A63 63 0 0 0 567.0 470.0", "cls": "x sc", "z": 1}, {"id": "s2_eg", "k": "text", "step": 2, "x": 450, "y": 430, "txt": "angles égaux", "cls": "lbl s tc", "z": 1, "anc": "middle"}, {"id": "s2_ans", "k": "text", "step": 2, "x": 450, "y": 560, "txt": "Je suis un triangle isocèle", "cls": "big", "z": 1, "anc": "middle"}, {"id": "s3_side0", "k": "path", "step": 3, "d": "M270.0 200.0L630.0 200.0", "cls": "pl sk", "z": 0}, {"id": "s3_side1", "k": "path", "step": 3, "d": "M630.0 200.0L630.0 420.0", "cls": "pl sk", "z": 0}, {"id": "s3_side2", "k": "path", "step": 3, "d": "M630.0 420.0L270.0 420.0", "cls": "pl sk", "z": 0}, {"id": "s3_side3", "k": "path", "step": 3, "d": "M270.0 420.0L270.0 200.0", "cls": "pl sk", "z": 0}, {"id": "s3_vA", "k": "text", "step": 3, "x": 246, "y": 190, "txt": "A", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s3_vB", "k": "text", "step": 3, "x": 654, "y": 190, "txt": "B", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s3_vC", "k": "text", "step": 3, "x": 654, "y": 450, "txt": "C", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s3_vD", "k": "text", "step": 3, "x": 246, "y": 450, "txt": "D", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s3_c1", "k": "text", "step": 3, "x": 450, "y": 62, "txt": "Indice 1 : j’ai quatre angles droits.", "cls": "clue", "z": 1, "anc": "middle", "off": "s3_c2"}, {"id": "s3_c2", "k": "text", "step": 3, "x": 450, "y": 62, "txt": "Indice 2 : mes côtés opposés sont égaux,", "cls": "clue", "z": 1, "anc": "middle", "off": "s3_c3"}, {"id": "s3_c3", "k": "text", "step": 3, "x": 450, "y": 62, "txt": "Indice 3 : mais mes quatre côtés ne sont pas tous égaux.", "cls": "clue", "z": 1, "anc": "middle", "off": "s3_c4"}, {"id": "s3_r1", "k": "path", "step": 3, "d": "M290.0 200.0L290.0 220.0L270.0 220.0", "cls": "x sa", "z": 1}, {"id": "s3_r2", "k": "path", "step": 3, "d": "M610.0 200.0L610.0 220.0L630.0 220.0", "cls": "x sa", "z": 1}, {"id": "s3_r3", "k": "path", "step": 3, "d": "M610.0 420.0L610.0 400.0L630.0 400.0", "cls": "x sa", "z": 1}, {"id": "s3_r4", "k": "path", "step": 3, "d": "M290.0 420.0L290.0 400.0L270.0 400.0", "cls": "x sa", "z": 1}, {"id": "s3_o1", "k": "path", "step": 3, "d": "M450.0 191.0L450.0 209.0", "cls": "x sc", "z": 1}, {"id": "s3_o2", "k": "path", "step": 3, "d": "M450.0 411.0L450.0 429.0", "cls": "x sc", "z": 1}, {"id": "s3_o3", "k": "path", "step": 3, "d": "M639.0 306.0L621.0 306.0M639.0 314.0L621.0 314.0", "cls": "x sg", "z": 1}, {"id": "s3_o4", "k": "path", "step": 3, "d": "M279.0 306.0L261.0 306.0M279.0 314.0L261.0 314.0", "cls": "x sg", "z": 1}, {"id": "s3_n1", "k": "text", "step": 3, "x": 450, "y": 170, "txt": "grand côté", "cls": "lbl s tc", "z": 1, "anc": "middle"}, {"id": "s3_n2", "k": "text", "step": 3, "x": 700, "y": 310, "txt": "petit côté", "cls": "lbl s tg", "z": 1, "anc": "middle"}, {"id": "s3_ans", "k": "text", "step": 3, "x": 450, "y": 560, "txt": "Je suis un rectangle", "cls": "big", "z": 1, "anc": "middle"}, {"id": "s4_side0", "k": "path", "step": 4, "d": "M250.0 440.0L650.0 440.0", "cls": "pl sk", "z": 0}, {"id": "s4_side1", "k": "path", "step": 4, "d": "M650.0 440.0L560.0 200.0", "cls": "pl sk", "z": 0}, {"id": "s4_side2", "k": "path", "step": 4, "d": "M560.0 200.0L340.0 200.0", "cls": "pl sk", "z": 0}, {"id": "s4_side3", "k": "path", "step": 4, "d": "M340.0 200.0L250.0 440.0", "cls": "pl sk", "z": 0}, {"id": "s4_vA", "k": "text", "step": 4, "x": 226, "y": 464, "txt": "A", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s4_vB", "k": "text", "step": 4, "x": 674, "y": 464, "txt": "B", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s4_vC", "k": "text", "step": 4, "x": 584, "y": 190, "txt": "C", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s4_vD", "k": "text", "step": 4, "x": 316, "y": 190, "txt": "D", "cls": "lbl", "z": 1, "anc": "middle"}, {"id": "s4_c1", "k": "text", "step": 4, "x": 450, "y": 62, "txt": "Indice 1 : j’ai quatre côtés.", "cls": "clue", "z": 1, "anc": "middle", "off": "s4_c2"}, {"id": "s4_c2", "k": "text", "step": 4, "x": 450, "y": 62, "txt": "Indice 2 : seuls deux de mes côtés sont parallèles,", "cls": "clue", "z": 1, "anc": "middle", "off": "s4_c3"}, {"id": "s4_c3", "k": "text", "step": 4, "x": 450, "y": 62, "txt": "Indice 3 : et les deux autres ont la même longueur.", "cls": "clue", "z": 1, "anc": "middle", "off": "s4_c4"}, {"id": "s4_h0", "k": "path", "step": 4, "d": "M250.0 440.0L650.0 440.0", "cls": "pl sa", "z": 1}, {"id": "s4_h1", "k": "path", "step": 4, "d": "M650.0 440.0L560.0 200.0", "cls": "pl sa", "z": 1}, {"id": "s4_h2", "k": "path", "step": 4, "d": "M560.0 200.0L340.0 200.0", "cls": "pl sa", "z": 1}, {"id": "s4_h3", "k": "path", "step": 4, "d": "M340.0 200.0L250.0 440.0", "cls": "pl sa", "z": 1}, {"id": "s4_p1", "k": "path", "step": 4, "d": "M250.0 440.0L650.0 440.0", "cls": "pl sc", "z": 1}, {"id": "s4_p2", "k": "path", "step": 4, "d": "M340.0 200.0L560.0 200.0", "cls": "pl sc", "z": 1}, {"id": "s4_q1", "k": "path", "step": 4, "d": "M441.0 449.0L456.0 440.0L441.0 431.0", "cls": "x sc", "z": 1}, {"id": "s4_q2", "k": "path", "step": 4, "d": "M441.0 209.0L456.0 200.0L441.0 191.0", "cls": "x sc", "z": 1}, {"id": "s4_l1", "k": "path", "step": 4, "d": "M250.0 440.0L340.0 200.0", "cls": "pl so", "z": 1}, {"id": "s4_l2", "k": "path", "step": 4, "d": "M650.0 440.0L560.0 200.0", "cls": "pl so", "z": 1}, {"id": "s4_k1", "k": "path", "step": 4, "d": "M286.6 316.8L303.4 323.2", "cls": "x so", "z": 1}, {"id": "s4_k2", "k": "path", "step": 4, "d": "M596.6 323.2L613.4 316.8", "cls": "x so", "z": 1}, {"id": "s4_ans", "k": "text", "step": 4, "x": 450, "y": 560, "txt": "Je suis un trapèze isocèle", "cls": "big", "z": 1, "anc": "middle"}], "acts": [{"t": "show", "step": 0, "show": [], "g": "Pour chaque devinette, on dessine la figure puis on vérifie chaque indice.", "d": 2800}, {"t": "show", "step": 1, "show": ["s1_side0"], "g": "On dessine le côté [AB].", "d": 650}, {"t": "show", "step": 1, "show": ["s1_side1"], "g": "On dessine le côté [BC].", "d": 650}, {"t": "show", "step": 1, "show": ["s1_side2"], "g": "On dessine le côté [CD].", "d": 650}, {"t": "show", "step": 1, "show": ["s1_side3"], "g": "On dessine le côté [DA].", "d": 650}, {"t": "show", "step": 1, "show": ["s1_vA", "s1_vB", "s1_vC", "s1_vD"], "g": "La figure est dessinée.", "d": 900}, {"t": "show", "step": 1, "show": ["s1_c1"], "g": "Indice 1 : on repère les quatre côtés de même longueur.", "d": 1400}, {"t": "show", "step": 1, "show": ["s1_h0", "s1_h1", "s1_h2", "s1_h3", "s1_k0", "s1_k1", "s1_k2", "s1_k3"], "g": "Les quatre côtés sont en rouge, avec le même repère : AB = BC = CD = DA.", "d": 3000}, {"t": "show", "step": 1, "show": ["s1_c2"], "g": "Indice 2 : on trace les deux diagonales.", "d": 1400}, {"t": "show", "step": 1, "show": ["s1_d1", "s1_d2", "s1_ra"], "g": "Les diagonales [AC] et [BD] se coupent à angle droit : elles sont perpendiculaires.", "d": 3000}, {"t": "show", "step": 1, "show": ["s1_c3"], "g": "Indice 3 : on regarde les angles du quadrilatère.", "d": 1400}, {"t": "show", "step": 1, "show": ["s1_n1", "s1_n2", "s1_n3", "s1_n4"], "g": "Les angles valent environ 120° et 60° : aucun n’est droit.", "d": 3000}, {"t": "show", "step": 1, "show": ["s1_ans"], "g": "Réponse : un losange.", "d": 3200}, {"t": "show", "step": 2, "show": ["s2_side0"], "g": "On dessine le côté [AB].", "d": 650}, {"t": "show", "step": 2, "show": ["s2_side1"], "g": "On dessine le côté [BC].", "d": 650}, {"t": "show", "step": 2, "show": ["s2_side2"], "g": "On dessine le côté [CA].", "d": 650}, {"t": "show", "step": 2, "show": ["s2_vA", "s2_vB", "s2_vC"], "g": "La figure est dessinée.", "d": 900}, {"t": "show", "step": 2, "show": ["s2_c1"], "g": "Indice 1 : un triangle a trois côtés ; on cherche deux côtés de même longueur.", "d": 1800}, {"t": "show", "step": 2, "show": ["s2_h1", "s2_h2", "s2_k1", "s2_k2"], "g": "[AB] et [AC] sont en rouge, avec le même repère : AB = AC.", "d": 3200}, {"t": "show", "step": 2, "show": ["s2_c2"], "g": "Indice 2 : on regarde les angles du triangle.", "d": 1600}, {"t": "show", "step": 2, "show": ["s2_g1", "s2_g2", "s2_g1b", "s2_g2b", "s2_eg"], "g": "Les deux angles à la base, en B et en C, sont égaux (même repère).", "d": 3200}, {"t": "show", "step": 2, "show": ["s2_ans"], "g": "Réponse : un triangle isocèle (en A).", "d": 3200}, {"t": "show", "step": 3, "show": ["s3_side0"], "g": "On dessine le côté [AB].", "d": 650}, {"t": "show", "step": 3, "show": ["s3_side1"], "g": "On dessine le côté [BC].", "d": 650}, {"t": "show", "step": 3, "show": ["s3_side2"], "g": "On dessine le côté [CD].", "d": 650}, {"t": "show", "step": 3, "show": ["s3_side3"], "g": "On dessine le côté [DA].", "d": 650}, {"t": "show", "step": 3, "show": ["s3_vA", "s3_vB", "s3_vC", "s3_vD"], "g": "La figure est dessinée.", "d": 900}, {"t": "show", "step": 3, "show": ["s3_c1"], "g": "Indice 1 : on vérifie les angles aux quatre sommets.", "d": 1400}, {"t": "show", "step": 3, "show": ["s3_r1", "s3_r2", "s3_r3", "s3_r4"], "g": "Les quatre angles sont droits (marques rouges).", "d": 3000}, {"t": "show", "step": 3, "show": ["s3_c2"], "g": "Indice 2 : on compare les côtés opposés.", "d": 1400}, {"t": "show", "step": 3, "show": ["s3_o1", "s3_o2", "s3_o3", "s3_o4"], "g": "AB = DC (un repère) et AD = BC (deux repères) : les côtés opposés sont égaux.", "d": 3200}, {"t": "show", "step": 3, "show": ["s3_c3"], "g": "Indice 3 : on compare un grand et un petit côté.", "d": 1400}, {"t": "show", "step": 3, "show": ["s3_n1", "s3_n2"], "g": "Un grand côté et un petit côté n’ont pas la même longueur : ce n’est pas un carré.", "d": 3200}, {"t": "show", "step": 3, "show": ["s3_ans"], "g": "Réponse : un rectangle (qui n’est pas un carré).", "d": 3200}, {"t": "show", "step": 4, "show": ["s4_side0"], "g": "On dessine le côté [AB].", "d": 650}, {"t": "show", "step": 4, "show": ["s4_side1"], "g": "On dessine le côté [BC].", "d": 650}, {"t": "show", "step": 4, "show": ["s4_side2"], "g": "On dessine le côté [CD].", "d": 650}, {"t": "show", "step": 4, "show": ["s4_side3"], "g": "On dessine le côté [DA].", "d": 650}, {"t": "show", "step": 4, "show": ["s4_vA", "s4_vB", "s4_vC", "s4_vD"], "g": "La figure est dessinée.", "d": 900}, {"t": "show", "step": 4, "show": ["s4_c1"], "g": "Indice 1 : on compte les côtés.", "d": 1400}, {"t": "show", "step": 4, "show": ["s4_h0", "s4_h1", "s4_h2", "s4_h3"], "g": "Quatre côtés : c’est un quadrilatère (en rouge).", "d": 2600}, {"t": "show", "step": 4, "show": ["s4_c2"], "g": "Indice 2 : on cherche les côtés parallèles.", "d": 1400}, {"t": "show", "step": 4, "show": ["s4_p1", "s4_p2", "s4_q1", "s4_q2"], "g": "[AB] et [DC] sont parallèles (en bleu, avec la flèche) ; [AD] et [BC] ne le sont pas.", "d": 3400}, {"t": "show", "step": 4, "show": ["s4_c3"], "g": "Indice 3 : on compare les deux côtés non parallèles.", "d": 1400}, {"t": "show", "step": 4, "show": ["s4_l1", "s4_l2", "s4_k1", "s4_k2"], "g": "AD = BC (en orange, même repère) : les deux autres côtés ont la même longueur.", "d": 3400}, {"t": "show", "step": 4, "show": ["s4_ans"], "g": "Réponse : un trapèze isocèle.", "d": 3600}], "cm": 50, "rp": 190, "why": "Losange : quatre côtés égaux, diagonales perpendiculaires. Triangle isocèle : deux côtés égaux et deux angles égaux. Rectangle : quatre angles droits, côtés opposés égaux. Trapèze isocèle : deux côtés parallèles et deux côtés non parallèles égaux."};
+function pt(c,r,a){return {x:c.x+r*Math.cos(a*D),y:c.y+r*Math.sin(a*D)}}
+function dist(p,q){return Math.hypot(q.x-p.x,q.y-p.y)}
+function ang(p,q){return Math.atan2(q.y-p.y,q.x-p.x)/D}
+function wrap180(x){while(x>180)x-=360;while(x<=-180)x+=360;return x}
+function wrapA(x){while(x>90)x-=360;while(x<=-270)x+=360;return x}
+function haFor(th){var b=null;[th-90,th+90].forEach(function(c){c=wrapA(c);var dd=Math.abs(c+90);if(b===null||dd<b.dd)b={c:c,dd:dd}});return b.c}
+function clamp(x,a,b){return Math.min(b,Math.max(a,x))}
+function lerp(a,b,f){return a+(b-a)*f}
+function ease(f){return f<.5?4*f*f*f:1-Math.pow(-2*f+2,3)/2}
+function sm(f){return f*f*(3-2*f)}
+function mix(a,b,f){return {x:lerp(a.x,b.x,f),y:lerp(a.y,b.y,f)}}
+function setL(el,a,b){el.setAttribute("x1",a.x);el.setAttribute("y1",a.y);el.setAttribute("x2",b.x);el.setAttribute("y2",b.y)}
+function mk(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var q in attrs)e.setAttribute(q,attrs[q]);(parent||$("gTop")).appendChild(e);return e}
+function V(a){return {x:a[0],y:a[1]}}
+function arcPath(cn,r,a0,a1){var n=Math.max(2,Math.ceil(Math.abs(a1-a0)/2)),d="";for(var i=0;i<=n;i++){var q=pt(cn,r,lerp(a0,a1,i/n));d+=(i?"L":"M")+q.x.toFixed(1)+" "+q.y.toFixed(1)}return d}
+var G={base:$("gBase"),draw:$("gDraw"),top:$("gTop"),spr:$("gSpr")};
+var REST={Px:800,Py:240,r:48,th:-105,ha:haFor(-105),cf:0};
+function st(P,r,th,cf){return {Px:P.x,Py:P.y,r:r,th:th,ha:haFor(th),cf:cf||0}}
+var STEPS=CFG.steps, RESETS=[];
+STEPS.forEach(function(s,i){if(s.reset)RESETS.push(i)});
+function vis(created,cur){for(var i=0;i<RESETS.length;i++){var r=RESETS[i];if(created<r&&r<=cur)return 0}return 1}
+var ITEMS={};
+CFG.items.forEach(function(it){
+  var parent=it.z?G.top:G.base,e;
+  if(it.k==="path")e=mk("path",{d:it.d,"class":it.cls},parent);
+  else if(it.k==="text"){e=mk("text",{x:it.x,y:it.y,"class":it.cls,"text-anchor":it.anc||"start"},parent);e.textContent=it.txt}
+  else{e=mk("circle",{cx:it.x,cy:it.y,r:it.r||5,"class":it.cls||"dot"},parent)}
+  e.setAttribute("opacity",0);ITEMS[it.id]={it:it,e:e,at:null,o:0};
+});
+/* ---------- chronologie ---------- */
+var S=[],cur=REST,cvis=false;
+function add(o){if(!o.to)o.to=cur;else cur=o.to;S.push(o);return o}
+var ARCS=[],LINES=[],PROTS=[],SQS=[],REV=[];
+function protGroup(a){
+  var Rp=CFG.rp||190, g=mk("g",{opacity:0},G.spr);
+  mk("path",{d:"M"+(-Rp)+" 0A"+Rp+" "+Rp+" 0 0 1 "+Rp+" 0Z",style:"fill:var(--ruler);stroke:var(--ruler-edge)","stroke-width":1.6},g);
+  mk("path",{d:"M"+(-Rp*.18)+" 0A"+(Rp*.18)+" "+(Rp*.18)+" 0 0 1 "+(Rp*.18)+" 0",fill:"none",style:"stroke:var(--ruler-edge)","stroke-width":1.2},g);
+  var tk=mk("g",{style:"stroke:var(--ruler-edge)","stroke-width":1.2},g);
+  for(var q=0;q<=180;q+=5){var c=Math.cos(q*D),s=Math.sin(q*D),l=q%10===0?16:9;mk("line",{x1:Rp*c,y1:-Rp*s,x2:(Rp-l)*c,y2:-(Rp-l)*s},tk);
+    if(q%30===0){var tx=mk("text",{x:(Rp-30)*c,y:-(Rp-30)*s+4,"text-anchor":"middle","font-size":11,stroke:"none",style:"fill:var(--ink)"},tk);tx.textContent=q}}
+  mk("line",{x1:-Rp,y1:0,x2:Rp,y2:0,style:"stroke:var(--ruler-edge)","stroke-width":1.4},g);
+  mk("circle",{cx:0,cy:0,r:4,style:"fill:var(--ruler-edge)"},g);
+  var pl=mk("line",{x1:(Rp-50)*Math.cos(a.ang*D),y1:-(Rp-50)*Math.sin(a.ang*D),x2:(Rp+16)*Math.cos(a.ang*D),y2:-(Rp+16)*Math.sin(a.ang*D),"stroke-width":3.4,"stroke-linecap":"round",style:"stroke:var(--accent)",opacity:0},g);
+  g.setAttribute("transform","translate("+a.V[0]+" "+a.V[1]+") rotate("+a.base+") scale(1 "+a.sgn+")");
+  return {g:g,pl:pl};
+}
+CFG.acts.forEach(function(a,i){
+  var n=a.step,nx=CFG.acts[i+1],tr=null;
+  if(a.t==="arc"){
+    var c=V(a.c),first=!cvis,r0=first?60:cur.r;
+    add({k:"cmove",d:first?1300:1000,to:st(c,r0,a.a0),step:n,g:a.gm||("Pique la pointe sèche en "+a.cn+"."),cv:first?"in":"on"});
+    if(first||Math.abs(a.r-r0)>1)add({k:"copen",d:1000,to:st(c,a.r,a.a0),step:n,g:a.go||"Règle l’ouverture du compas.",cv:"on"});
+    var sg=add({k:"cdraw",d:Math.max(1500,Math.abs(a.a1-a.a0)*13),to:st(c,a.r,a.a1),step:n,g:a.g||"Trace l’arc de cercle.",cv:"on"});
+    ARCS.push({a:a,seg:sg,step:n,el:mk("path",{fill:"none","class":"td "+(a.col||"sc")},G.draw)});
+    tr=sg;
+    if(!nx||nx.t!=="arc")add({k:"caway",d:900,to:REST,step:n,g:"Range le compas.",cv:"out"});
+    cvis=!!(nx&&nx.t==="arc");
+    a._rev="end:"+S.indexOf(sg);
+  }else if(a.t==="line"){
+    var p=V(a.p),q=V(a.q),len0=dist(p,q),u={x:(q.x-p.x)/len0,y:(q.y-p.y)/len0},e0=a.e0||0,e1=a.e1||0;
+    var S0={x:p.x-e0*u.x,y:p.y-e0*u.y},E={x:q.x+e1*u.x,y:q.y+e1*u.y},tb=ang(S0,E),len=dist(S0,E);
+    var rot=tb;if(rot>90)rot-=180;if(rot<=-90)rot+=180;
+    var fl=Math.abs(wrap180(rot-tb))>1,x0=fl?500:0,dr={x:Math.cos(rot*D),y:Math.sin(rot*D)};
+    var origin={x:S0.x-x0*dr.x,y:S0.y-x0*dr.y},nrm={x:-dr.y,y:dr.x},xh=fl?545:-42;
+    var L={a:a,S:S0,tb:tb,len:len,rot:rot,origin:origin,press:{x:origin.x+xh*dr.x+26*nrm.x,y:origin.y+xh*dr.y+26*nrm.y},step:n,
+      el:mk("path",{fill:"none","class":"td "+(a.col||"sa")},G.draw)};
+    L.rin=add({k:"rin",d:1000,step:n,g:a.gr||"Pose la règle sur la ligne à tracer ; la main gauche la maintient.",to:REST});
+    L.dr=add({k:"ldraw",d:800+len*2.4,step:n,g:a.g||"Trace le trait au crayon, le long de la règle."});
+    L.ro=add({k:"rout",d:800,step:n,g:"Retire la règle."});
+    LINES.push(L);tr=L.dr;a._rev="end:"+S.indexOf(L.dr);
+  }else if(a.t==="proto"){
+    var P=protGroup(a);P.a=a;P.M=V(a.M);P.step=n;
+    P.pin=add({k:"pin",d:1200,step:n,g:a.gp||"Pose le rapporteur : le centre sur le sommet, le zéro sur le côté.",to:REST});
+    P.pm=add({k:"pmark",d:1300,step:n,g:a.g||"Repère l’angle avec un petit trait de crayon."});
+    P.po=add({k:"pout",d:800,step:n,g:"Retire le rapporteur."});
+    PROTS.push(P);a._rev="end:"+S.indexOf(P.pm);
+  }else if(a.t==="sq"){
+    var I=V(a.I),H=V(a.H),dl=dist(I,H),nn={x:(I.x-H.x)/dl,y:(I.y-H.y)/dl},ul={x:a.u[0],y:a.u[1]};
+    var s0=a.s0||150, sgn=s0>0?-1:1;
+    var Q={a:a,I:I,H:H,n:nn,u:ul,s0:s0,dir:sgn,step:n,poly:mk("path",{style:"fill:var(--ruler);stroke:var(--ruler-edge)","stroke-width":2,opacity:0,"stroke-linejoin":"round"},G.spr),
+      el:mk("path",{fill:"none","class":"td "+(a.col||"sa")+" th"},G.draw)};
+    Q.si=add({k:"sqin",d:1000,step:n,g:a.gp||"Pose l’équerre : un côté de l’angle droit le long de la droite.",to:REST});
+    Q.ss=add({k:"sqslide",d:1400,step:n,g:a.gs||"Fais glisser l’équerre jusqu’à ce que l’autre côté passe par le centre I."});
+    Q.sd=add({k:"sqdraw",d:1400,step:n,g:a.g||"Trace le trait au crayon, le long de l’équerre."});
+    Q.so=add({k:"sqout",d:800,step:n,g:"Retire l’équerre."});
+    SQS.push(Q);a._rev="end:"+S.indexOf(Q.sd);
+  }else{
+    var sh=add({k:"show",d:a.d||1800,step:n,g:a.g||"",to:REST});a._rev="at:"+S.indexOf(sh);
+  }
+});
+var total=0;S.forEach(function(s,i){s.t0=total;total+=s.d;s.from=i?S[i-1].to:REST});
+var stepT0={};S.forEach(function(s){if(stepT0[s.step]===undefined)stepT0[s.step]=s.t0});
+CFG.acts.forEach(function(a){
+  var tt=0,r=a._rev.split(":"),sg=S[+r[1]];tt=r[0]==="end"?sg.t0+sg.d:sg.t0+150;
+  (a.show||[]).forEach(function(id){var o=ITEMS[id];if(o&&(o.at===null||tt<o.at))o.at=tt});
+});
+Object.keys(ITEMS).forEach(function(k){var o=ITEMS[k];if(o.at===null)o.at=(stepT0[o.it.step]||0)});
+function prog(sg,t){return clamp((t-sg.t0)/sg.d,0,1)}
+/* règle */
+var tk=$("rticks"),cmx=CFG.cm;
+for(var i=0;i*cmx<=570;i++){var x=i*cmx;mk("line",{x1:x,x2:x,y1:1,y2:i%5===0?18:12},tk);
+  if((i+.5)*cmx<=570)mk("line",{x1:x+cmx/2,x2:x+cmx/2,y1:1,y2:7},tk);
+  if(i>0){var tx=mk("text",{x:x,y:32,"text-anchor":"middle","font-size":11,stroke:"none",style:"fill:var(--ink)"},tk);tx.textContent=i}}
+/* compas */
+function compassAt(cc){
+  var Q={x:cc.Px+cc.r*Math.cos(cc.th*D),y:cc.Py+cc.r*Math.sin(cc.th*D)},P={x:cc.Px,y:cc.Py};
+  var Mm={x:(P.x+Q.x)/2,y:(P.y+Q.y)/2},pa=cc.ha*D;
+  var ux=Math.cos(pa),uy=Math.sin(pa)-.6,l=Math.hypot(ux,uy);ux/=l;uy/=l;
+  var H={x:Mm.x+ux*80,y:Mm.y+uy*80};
+  if(cc.cf>0){var Hc={x:P.x+.2*(Q.x-P.x),y:P.y+.2*(Q.y-P.y)-85};H={x:lerp(H.x,Hc.x,cc.cf),y:lerp(H.y,Hc.y,cc.cf)};ux=lerp(ux,0,cc.cf);uy=lerp(uy,-1,cc.cf);l=Math.hypot(ux,uy);ux/=l;uy/=l}
+  return {P:P,Q:Q,H:H,K:{x:H.x+ux*36,y:H.y+uy*36},u:{x:ux,y:uy}};
+}
+var el={};["legN","needle","legP","wood","lead","stem","hinge","shL1","shL2","compass","handR","handL","pencilG","ruler"].forEach(function(k){el[k]=$(k)});
+function sqPoly(Q,s){
+  var Cn={x:Q.H.x+s*Q.u.x,y:Q.H.y+s*Q.u.y},Lu=330,Ln=250,d=Q.dir;
+  var A={x:Cn.x+d*Lu*Q.u.x,y:Cn.y+d*Lu*Q.u.y},B={x:Cn.x+Ln*Q.n.x,y:Cn.y+Ln*Q.n.y};
+  return "M"+Cn.x.toFixed(1)+" "+Cn.y.toFixed(1)+"L"+A.x.toFixed(1)+" "+A.y.toFixed(1)+"L"+B.x.toFixed(1)+" "+B.y.toFixed(1)+"Z";
+}
+function render(t){
+  t=clamp(t,0,total-.001);
+  var i=0;while(i<S.length-1&&t>=S[i].t0+S[i].d)i++;
+  var s=S[i],f=clamp((t-s.t0)/s.d,0,1),e=s.k==="cdraw"?sm(f):ease(f),p=s.from,q=s.to,cs=s.step;
+  var c0={Px:lerp(p.Px,q.Px,e),Py:lerp(p.Py,q.Py,e),r:lerp(p.r,q.r,e),th:lerp(p.th,q.th,e),ha:lerp(p.ha,q.ha,e),cf:lerp(p.cf,q.cf,e)};
+  var g=compassAt(c0);
+  setL(el.legN,g.H,g.P);setL(el.legP,g.H,g.Q);setL(el.needle,mix(g.H,g.P,.78),g.P);
+  setL(el.wood,mix(g.H,g.Q,.72),mix(g.H,g.Q,.93));setL(el.lead,mix(g.H,g.Q,.93),g.Q);setL(el.stem,g.H,g.K);
+  el.hinge.setAttribute("cx",g.H.x);el.hinge.setAttribute("cy",g.H.y);
+  setL(el.shL1,{x:g.H.x+9,y:g.H.y+11},{x:g.P.x+9,y:g.P.y+11});setL(el.shL2,{x:g.H.x+9,y:g.H.y+11},{x:g.Q.x+9,y:g.Q.y+11});
+  var ca=s.cv==="in"?ease(clamp(f/.5,0,1)):s.cv==="out"?1-ease(clamp(f/.6,0,1)):s.cv==="on"?1:0;
+  el.compass.setAttribute("opacity",ca);el.handR.setAttribute("opacity",ca);
+  el.handR.setAttribute("transform","translate("+g.K.x.toFixed(1)+" "+g.K.y.toFixed(1)+") rotate("+(Math.atan2(g.u.x,-g.u.y)/D*.75).toFixed(1)+")");
+  /* arcs */
+  ARCS.forEach(function(A){var a=A.a,ff=prog(A.seg,t);A.el.setAttribute("d",ff<=0?"":arcPath({x:a.c[0],y:a.c[1]},a.r,a.a0,lerp(a.a0,a.a1,sm(ff))));A.el.setAttribute("opacity",vis(A.step,cs))});
+  var pa=0,T=null,act=null,rp=0;
+  /* lignes à la règle */
+  LINES.forEach(function(L){
+    var r=0;
+    if(t>=L.rin.t0&&t<L.dr.t0)r=t<L.rin.t0+L.rin.d?ease(prog(L.rin,t)):1;
+    else if(t>=L.dr.t0&&t<L.ro.t0)r=1;
+    else if(t>=L.ro.t0&&t<L.ro.t0+L.ro.d)r=1-ease(prog(L.ro,t));
+    if(r>0){act=L;rp=r}
+    var len=0;if(t>=L.dr.t0)len=L.len*(t<L.dr.t0+L.dr.d?ease(prog(L.dr,t)):1);
+    var tip=pt(L.S,len,L.tb);
+    L.el.setAttribute("d",len>0?"M"+L.S.x.toFixed(1)+" "+L.S.y.toFixed(1)+"L"+tip.x.toFixed(1)+" "+tip.y.toFixed(1):"");
+    L.el.setAttribute("opacity",vis(L.step,cs));
+    if(t>=L.rin.t0&&t<L.ro.t0+L.ro.d){
+      if(t<L.rin.t0+L.rin.d){var pf=clamp((prog(L.rin,t)-.4)/.6,0,1);pa=pf;T={x:L.S.x,y:L.S.y-40*(1-ease(pf))}}
+      else if(t<L.ro.t0){pa=1;T=tip}
+      else{var cf=ease(prog(L.ro,t));pa=1-cf;T={x:tip.x,y:tip.y-50*cf}}
+    }
+  });
+  if(act){el.ruler.setAttribute("opacity",clamp(rp*1.4,0,1));el.ruler.setAttribute("transform","translate("+(act.origin.x+(1-rp)*240)+" "+(act.origin.y+(1-rp)*170)+") rotate("+act.rot+")")}
+  else el.ruler.setAttribute("opacity",0);
+  /* rapporteurs */
+  PROTS.forEach(function(P){
+    var o=0,ml=0;
+    if(t>=P.pin.t0&&t<P.pm.t0)o=ease(prog(P.pin,t));
+    else if(t>=P.pm.t0&&t<P.po.t0)o=1;
+    else if(t>=P.po.t0&&t<P.po.t0+P.po.d)o=1-ease(prog(P.po,t));
+    if(t>=P.pm.t0)ml=clamp(prog(P.pm,t)*3,0,1);
+    P.g.setAttribute("opacity",o*vis(P.step,cs));P.pl.setAttribute("opacity",t>=P.po.t0+P.po.d?0:ml);
+    if(t>=P.pm.t0&&t<P.po.t0+P.po.d){
+      if(t<P.po.t0){var f2=ease(prog(P.pm,t));pa=Math.min(1,f2*2);T={x:P.M.x,y:P.M.y-70*(1-f2)}}
+      else{var f3=ease(prog(P.po,t));pa=1-f3;T={x:P.M.x,y:P.M.y-60*f3}}
+    }
+  });
+  /* équerres */
+  SQS.forEach(function(Q){
+    var o=0,sv=Q.s0,len=0;
+    if(t>=Q.si.t0&&t<Q.ss.t0){o=ease(prog(Q.si,t))}
+    else if(t>=Q.ss.t0&&t<Q.sd.t0){o=1;sv=Q.s0*(1-ease(prog(Q.ss,t)))}
+    else if(t>=Q.sd.t0&&t<Q.so.t0){o=1;sv=0}
+    else if(t>=Q.so.t0&&t<Q.so.t0+Q.so.d){o=1-ease(prog(Q.so,t));sv=0}
+    else if(t>=Q.so.t0+Q.so.d)sv=0;
+    Q.poly.setAttribute("d",sqPoly(Q,sv));Q.poly.setAttribute("opacity",o*.9*vis(Q.step,cs));
+    if(t>=Q.sd.t0)len=t<Q.sd.t0+Q.sd.d?ease(prog(Q.sd,t)):1;
+    var tp=mix(Q.I,Q.H,len);
+    Q.el.setAttribute("d",len>0?"M"+Q.I.x.toFixed(1)+" "+Q.I.y.toFixed(1)+"L"+tp.x.toFixed(1)+" "+tp.y.toFixed(1):"");Q.el.setAttribute("opacity",vis(Q.step,cs));
+    if(t>=Q.sd.t0&&t<Q.so.t0+Q.so.d){
+      if(t<Q.so.t0){pa=Math.min(1,prog(Q.sd,t)*4);T=tp}
+      else{var f4=ease(prog(Q.so,t));pa=1-f4;T={x:Q.H.x,y:Q.H.y-50*f4}}
+    }
+  });
+  /* main gauche */
+  var lrp=act?rp:0,lr0=CFG.lrest||{x:830,y:600};
+  var lx=act?lerp(lr0.x,act.press.x,lrp):lr0.x,ly=act?lerp(lr0.y,act.press.y,lrp):lr0.y,lrot=act?lerp(0,act.rot,lrp):0;
+  el.handL.setAttribute("transform","translate("+lx.toFixed(1)+" "+ly.toFixed(1)+") rotate("+lrot.toFixed(1)+")");
+  el.pencilG.setAttribute("opacity",pa);
+  if(T)el.pencilG.setAttribute("transform","translate("+T.x.toFixed(1)+" "+T.y.toFixed(1)+") rotate(8)");
+  /* éléments fixes */
+  var ops={};
+  Object.keys(ITEMS).forEach(function(k){var o=ITEMS[k];ops[k]=clamp((t-o.at)/350,0,1)*vis(o.it.step,cs)});
+  Object.keys(ITEMS).forEach(function(k){var o=ITEMS[k],v=ops[k];if(o.it.off&&ops[o.it.off]!==undefined)v*=1-ops[o.it.off];o.e.setAttribute("opacity",v)});
+  caption(s,t);
+  $("seek").value=Math.round(t/total*1000);
+}
+var lastSeg=null,lastStep=-1;
+var CH=[];STEPS.forEach(function(k,n){if(k.chip)CH.push(n)});
+function chipOf(n){var r=0;CH.forEach(function(c,i){if(c<=n)r=i});return r}
+function caption(s,t){
+  var k=STEPS[s.step];
+  if(lastStep!==s.step){
+    lastStep=s.step;$("badge").textContent=k.badge;$("title").textContent=k.title;$("text").textContent=k.text;
+    var cs=$("chips").children,on=chipOf(s.step);for(var i=0;i<cs.length;i++){cs[i].classList.toggle("on",i===on);cs[i].setAttribute("aria-current",i===on?"step":"false")}
+  }
+  if(lastSeg!==s){lastSeg=s;$("gesture").textContent=s.g}
+  $("why").hidden=!(s.step===STEPS.length-1&&t>=S[S.length-1].t0);
+}
+var chips=$("chips");
+CH.forEach(function(n,idx){
+  var bt=document.createElement("button");bt.type="button";bt.className="chip";
+  bt.innerHTML="<b>"+(idx+1)+"</b><span></span>";bt.lastChild.textContent=STEPS[n].chip;
+  bt.addEventListener("click",function(){time=stepT0[n];lastStep=-1;render(time)});
+  chips.appendChild(bt);
+});
+var time=0,playing=!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches),speed=1,last=0,play=$("play");
+var loopOn=false,endAt=0,loopBtn=$("loop");
+function label(){play.textContent=time>=total-1&&!loopOn?"Rejouer":(playing?"Pause":"Lecture")}
+function frame(ts){if(playing){time+=(ts-last)*speed;if(time>=total){if(loopOn){if(!endAt)endAt=ts;if(ts-endAt>2200){time=0;endAt=0}else time=total-2}else{time=total;playing=false}}}last=ts;render(time);label();requestAnimationFrame(frame)}
+play.addEventListener("click",function(){if(time>=total-1){time=0;playing=true}else playing=!playing;label()});
+$("restart").addEventListener("click",function(){time=0;playing=true;label()});
+$("seek").addEventListener("input",function(){playing=false;time=$("seek").value/$("seek").max*total;render(time);label()});
+$("speed").addEventListener("change",function(){speed=parseFloat($("speed").value)});
+loopBtn.addEventListener("click",function(){loopOn=!loopOn;loopBtn.setAttribute("aria-pressed",loopOn?"true":"false");loopBtn.textContent=loopOn?"Boucle : oui":"Boucle : non";endAt=0;if(loopOn&&!playing&&time>=total-1){time=0;playing=true}label()});
+window.__anim={set:function(t){playing=false;time=t;lastStep=-1;lastSeg=null;render(t)},total:total,step0:stepT0};
+requestAnimationFrame(function(ts){last=ts;frame(ts)});
+render(0);label();
+})();
+
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>
+</body>
+</html>
