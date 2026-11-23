@@ -1,17 +1,21 @@
 /**
- * CONSTRUIRE LA PETITE APPLICATION « GÉOMÉTRIE » (Vincent, 23.11.2026).
+ * CONSTRUIRE LA PETITE APPLICATION « F » (Vincent, 23.11.2026).
  *
  *   node construire.mjs
  *
- * Prend les animations de Vincent dans E:\Ecole\Espace\Application (jamais modifiées) et fabrique, dans `docs/`, un site
- * que GitHub Pages sert tel quel :
- *   - une page d'accueil avec la liste des animations ;
- *   - chaque animation, avec ses polices copiées dans le site (plus aucun appel vers Google depuis le téléphone des
- *     élèves) et un petit lien « ← Accueil » (une application installée n'a pas de bouton « retour » sur iPhone) ;
+ * Prend les animations de Vincent sur E: (jamais modifiées) et fabrique, dans `docs/`, un site que GitHub Pages sert
+ * tel quel :
+ *   - une page d'accueil avec une TUILE par domaine (aujourd'hui : ESPACE) ;
+ *   - une page par domaine, avec la liste de ses animations — chacune sous l'INTITULÉ qu'elle affiche elle-même
+ *     (son grand titre), pour que l'élève retrouve le nom de l'exercice ;
+ *   - chaque animation, avec ses polices copiées dans le site (aucun appel vers Google depuis le téléphone des élèves)
+ *     et un lien de retour vers son domaine (une application installée n'a pas de bouton « retour » sur iPhone) ;
  *   - l'icône au grand F, le manifeste et le service de cache qui rendent l'application installable et utilisable
  *     hors connexion.
  *
- * Pour ajouter une animation : une ligne dans ANIMATIONS, puis relancer ce script, committer et pousser.
+ * POUR AJOUTER UNE ANIMATION : une ligne dans la liste `animations` de sa tuile, puis relancer ce script, vérifier
+ * (verifier.mjs), committer et pousser. POUR AJOUTER UN DOMAINE : une tuile de plus dans TUILES.
+ * Le nom du fichier publié (`fichier`) ne change plus une fois en ligne : des téléphones l'ont en mémoire.
  */
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -19,34 +23,21 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
-const SOURCE = 'E:/Ecole/Espace/Application';
 const SORTIE = resolve(ICI, 'docs');
-const VERSION = '2026-11-23a';
+const VERSION = '2026-11-23b';
 
-const ANIMATIONS = [
+const TUILES = [
 	{
-		source: 'Mediatrice_au_compas_1.html',
-		fichier: 'mediatrice.html',
-		titre: 'La médiatrice',
-		texte: 'Construire la médiatrice d’un segment, au compas et à la règle.'
-	},
-	{
-		source: 'Bissectrice_au_compas_1.html',
-		fichier: 'bissectrice.html',
-		titre: 'La bissectrice',
-		texte: 'Partager un angle en deux angles égaux, au compas et à la règle.'
-	},
-	{
-		source: 'Cercle_circonscrit_au_compas_1.html',
-		fichier: 'cercle-circonscrit.html',
-		titre: 'Le cercle circonscrit',
-		texte: 'Le cercle qui passe par les trois sommets d’un triangle.'
-	},
-	{
-		source: 'Cercle_inscrit_au_compas_1.html',
-		fichier: 'cercle-inscrit.html',
-		titre: 'Le cercle inscrit',
-		texte: 'Le cercle qui touche les trois côtés d’un triangle.'
+		nom: 'ESPACE',
+		page: 'espace.html',
+		texte: 'Les constructions au compas, pas à pas.',
+		dossier: 'E:/Ecole/Espace/Application',
+		animations: [
+			{ source: 'Mediatrice_au_compas_1.html', fichier: 'mediatrice.html' },
+			{ source: 'Bissectrice_au_compas_1.html', fichier: 'bissectrice.html' },
+			{ source: 'Cercle_circonscrit_au_compas_1.html', fichier: 'cercle-circonscrit.html' },
+			{ source: 'Cercle_inscrit_au_compas_1.html', fichier: 'cercle-inscrit.html' }
+		]
 	}
 ];
 
@@ -109,10 +100,21 @@ const TETE_COMMUNE = `<link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Géométrie">`;
 const SERVICE = `<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>`;
 // (Dans le flux de la page, au-dessus du titre : en position fixe, il recouvrait le titre de l'animation.)
-const RETOUR = `<div style="padding:12px 16px 0"><a href="./" style="display:inline-block;padding:8px 14px;border-radius:999px;background:#1d4e89;color:#fff;font:600 15px/1 system-ui,sans-serif;text-decoration:none">← Accueil</a></div>`;
+const retour = (href, nom) =>
+	`<div style="padding:12px 16px 0"><a href="${href}" style="display:inline-block;padding:8px 14px;border-radius:999px;background:#1d4e89;color:#fff;font:600 15px/1 system-ui,sans-serif;text-decoration:none">← ${nom}</a></div>`;
+const echapper = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-function animation(a) {
-	let s = readFileSync(resolve(SOURCE, a.source), 'utf8').replace(/\r\n/g, '\n');
+/** Copie une animation dans le site ; rend l'intitulé qu'elle affiche (son grand titre). */
+function animation(tuile, a) {
+	let s = readFileSync(resolve(tuile.dossier, a.source), 'utf8').replace(/\r\n/g, '\n');
+	// L'intitulé : le grand titre de la page, tel que l'élève le lit ; à défaut, le titre de l'onglet.
+	const h1 = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(s)?.[1] ?? /<title>([^<]*)<\/title>/.exec(s)?.[1] ?? '';
+	const intitule = h1
+		.replace(/<[^>]+>/g, ' ')
+		.replace(/&nbsp;/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
+	if (!intitule) throw new Error(`${a.source} : aucun intitulé trouvé`);
 	// Les appels à Google Fonts sortent ; la feuille locale entre.
 	const avant = s.length;
 	s = s.replace(/<link[^>]*fonts\.(?:googleapis|gstatic)\.com[^>]*>\s*/g, '');
@@ -120,23 +122,16 @@ function animation(a) {
 	if (/fonts\.(googleapis|gstatic)\.com/.test(s)) throw new Error(`${a.source} : il reste un appel à Google`);
 	if (!s.includes('</head>') || !/<body[^>]*>/.test(s)) throw new Error(`${a.source} : page inattendue`);
 	s = s.replace('</head>', () => `<link rel="stylesheet" href="polices/polices.css">\n${TETE_COMMUNE}\n</head>`);
-	s = s.replace(/<body[^>]*>/, (m) => `${m}\n${RETOUR}`);
+	s = s.replace(/<body[^>]*>/, (m) => `${m}\n${retour(tuile.page, tuile.nom[0] + tuile.nom.slice(1).toLowerCase())}`);
 	s = s.replace('</body>', () => `${SERVICE}\n</body>`);
 	writeFileSync(resolve(SORTIE, a.fichier), s);
+	return intitule;
 }
 
-const accueil = () => `<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Géométrie</title>
-<link rel="stylesheet" href="polices/polices.css">
-${TETE_COMMUNE}
-<style>
-:root{--fond:#eef2f6;--carte:#ffffff;--encre:#16222e;--doux:#566676;--trait:#d3dce5;--bleu:#1d4e89;--bleu-doux:#e2ecf7}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fond:#0f1820;--carte:#18242f;--encre:#e7eef4;--doux:#9db0bf;--trait:#2b3b49;--bleu:#7fb2ea;--bleu-doux:#1b2f44;color-scheme:dark}}
-:root[data-theme="dark"]{--fond:#0f1820;--carte:#18242f;--encre:#e7eef4;--doux:#9db0bf;--trait:#2b3b49;--bleu:#7fb2ea;--bleu-doux:#1b2f44;color-scheme:dark}
+const STYLE = `
+:root{--fond:#eef2f6;--carte:#ffffff;--encre:#16222e;--doux:#566676;--trait:#d3dce5;--bleu:#1d4e89;--bleu-doux:#e2ecf7;--sur-bleu:#ffffff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fond:#0f1820;--carte:#18242f;--encre:#e7eef4;--doux:#9db0bf;--trait:#2b3b49;--bleu:#7fb2ea;--bleu-doux:#1b2f44;--sur-bleu:#0f1820;color-scheme:dark}}
+:root[data-theme="dark"]{--fond:#0f1820;--carte:#18242f;--encre:#e7eef4;--doux:#9db0bf;--trait:#2b3b49;--bleu:#7fb2ea;--bleu-doux:#1b2f44;--sur-bleu:#0f1820;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--fond);color:var(--encre);font:17px/1.5 "Figtree","Segoe UI",system-ui,sans-serif;padding:0 16px 48px}
@@ -146,40 +141,69 @@ header img{width:56px;height:56px;border-radius:14px;flex:none}
 h1{font:700 1.9rem/1.1 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;margin:0}
 header p{margin:2px 0 0;color:var(--doux)}
 ul{list-style:none;margin:0;padding:0;display:grid;gap:12px}
-li a{display:block;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:16px 18px;color:inherit;text-decoration:none}
-li a:active{background:var(--bleu-doux)}
-li strong{display:block;font:700 1.2rem/1.25 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;color:var(--bleu)}
-li span{color:var(--doux)}
+.tuiles a{display:block;background:var(--bleu);color:var(--sur-bleu);border-radius:18px;padding:26px 22px;text-decoration:none}
+.tuiles strong{display:block;font:700 1.9rem/1.1 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;letter-spacing:.04em}
+.tuiles span{display:block;margin-top:6px;opacity:.9}
+.liste a{display:block;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:16px 18px;color:var(--bleu);text-decoration:none;font:700 1.15rem/1.3 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif}
+.liste a:active{background:var(--bleu-doux)}
+.retour{display:inline-block;margin-top:14px;padding:8px 14px;border-radius:999px;background:var(--bleu);color:var(--sur-bleu);font:600 15px/1 system-ui,sans-serif;text-decoration:none}
 details{margin-top:26px;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:14px 18px}
 summary{font-weight:600;cursor:pointer}
-details p{margin:10px 0 0}
+details p{margin:10px 0 0}`;
+const page = (titre, corps) => `<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${titre}</title>
+<link rel="stylesheet" href="polices/polices.css">
+${TETE_COMMUNE}
+<style>${STYLE}
 </style>
 </head>
 <body>
 <main>
-<header>
-<img src="icones/icone-192.png" alt="">
-<div><h1>Géométrie</h1><p>Les constructions au compas, pas à pas.</p></div>
-</header>
-<ul>
-${ANIMATIONS.map((a) => `<li><a href="${a.fichier}"><strong>${a.titre}</strong><span>${a.texte}</span></a></li>`).join('\n')}
-</ul>
-<details>
-<summary>Mettre cette page sur l’écran de mon téléphone</summary>
-<p><strong>Android (Chrome)</strong> : touche les trois points en haut à droite, puis « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
-<p><strong>iPhone (Safari)</strong> : touche le bouton de partage (le carré avec une flèche), puis « Sur l’écran d’accueil ».</p>
-<p>Une fois installée, l’application fonctionne aussi sans connexion.</p>
-</details>
+${corps}
 </main>
 ${SERVICE}
 </body>
 </html>
 `;
 
+const accueil = () =>
+	page(
+		'Géométrie',
+		`<header>
+<img src="icones/icone-192.png" alt="">
+<div><h1>Géométrie</h1><p>Choisis un domaine.</p></div>
+</header>
+<ul class="tuiles">
+${TUILES.map((t) => `<li><a href="${t.page}"><strong>${t.nom}</strong><span>${echapper(t.texte)}</span></a></li>`).join('\n')}
+</ul>
+<details>
+<summary>Mettre cette page sur l’écran de mon téléphone</summary>
+<p><strong>Android (Chrome)</strong> : touche les trois points en haut à droite, puis « Ajouter à l’écran d’accueil » ou « Installer l’application ».</p>
+<p><strong>iPhone (Safari)</strong> : touche le bouton de partage (le carré avec une flèche), puis « Sur l’écran d’accueil ».</p>
+<p>Une fois installée, l’application fonctionne aussi sans connexion. Les nouvelles animations arrivent toutes seules : il n’y a rien à mettre à jour.</p>
+</details>`
+	);
+
+const domaine = (t, intitules) =>
+	page(
+		`${t.nom} — Géométrie`,
+		`<a class="retour" href="./">← Accueil</a>
+<header>
+<div><h1>${t.nom}</h1><p>${echapper(t.texte)}</p></div>
+</header>
+<ul class="liste">
+${t.animations.map((a, i) => `<li><a href="${a.fichier}">${echapper(intitules[i])}</a></li>`).join('\n')}
+</ul>`
+	);
+
 const manifeste = () =>
 	JSON.stringify(
 		{
-			name: 'Géométrie — constructions au compas',
+			name: 'Géométrie — les animations',
 			short_name: 'Géométrie',
 			lang: 'fr',
 			start_url: './',
@@ -197,8 +221,10 @@ const manifeste = () =>
 		'\t'
 	);
 
-const service = (fichiers) => `// Le cache de l'application « Géométrie » : tout est gardé sur le téléphone à la première visite.
-// À chaque visite avec connexion, la page servie vient du cache (instantané) et sa copie est rafraîchie en arrière-plan.
+const service = (fichiers) => `// Le cache de l'application : tout est gardé sur le téléphone à la première visite.
+// LES PAGES : le réseau d'abord — avec une connexion, l'élève voit toujours la dernière version, sans rien rafraîchir ;
+// sans connexion (ou si le réseau traîne plus de 4 secondes), la copie gardée sur le téléphone.
+// LE RESTE (polices, icônes) : la copie gardée d'abord, rafraîchie en arrière-plan.
 const CACHE = 'geometrie-${VERSION}';
 const FICHIERS = ${JSON.stringify(fichiers, null, '\t')};
 self.addEventListener('install', (e) => {
@@ -212,18 +238,23 @@ self.addEventListener('activate', (e) => {
 			.then(() => self.clients.claim())
 	);
 });
+const estUnePage = (req) => req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
 self.addEventListener('fetch', (e) => {
 	if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
 	e.respondWith(
 		caches.open(CACHE).then(async (c) => {
 			const enCache = await c.match(e.request, { ignoreSearch: true });
-			const reseau = fetch(e.request)
-				.then((r) => {
-					if (r.ok) c.put(e.request, r.clone());
-					return r;
-				})
-				.catch(() => enCache);
-			return enCache || reseau;
+			const reseau = fetch(e.request, estUnePage(e.request) ? { cache: 'no-cache' } : undefined).then((r) => {
+				if (r.ok) c.put(e.request, r.clone());
+				return r;
+			});
+			if (!estUnePage(e.request)) {
+				reseau.catch(() => {});
+				return enCache || reseau;
+			}
+			if (!enCache) return reseau;
+			const patience = new Promise((ok) => setTimeout(() => ok(enCache), 4000));
+			return Promise.race([reseau.catch(() => enCache), patience]);
 		})
 	);
 });
@@ -250,7 +281,14 @@ for (const [nom, taille, marge] of [
 ])
 	await sharp(Buffer.from(F_SVG(taille, marge))).png().toFile(resolve(SORTIE, 'icones', nom));
 
-for (const a of ANIMATIONS) animation(a);
+const pages = ['index.html'];
+for (const t of TUILES) {
+	const intitules = t.animations.map((a) => animation(t, a));
+	writeFileSync(resolve(SORTIE, t.page), domaine(t, intitules));
+	pages.push(t.page, ...t.animations.map((a) => a.fichier));
+	console.log(`${t.nom} :\n  - ${intitules.join('\n  - ')}`);
+}
+if (new Set(pages).size !== pages.length) throw new Error('deux pages portent le même nom de fichier');
 writeFileSync(resolve(SORTIE, 'index.html'), accueil());
 writeFileSync(resolve(SORTIE, 'manifest.webmanifest'), manifeste());
 writeFileSync(resolve(SORTIE, '.nojekyll'), '');
@@ -258,9 +296,8 @@ writeFileSync(
 	resolve(SORTIE, 'sw.js'),
 	service([
 		'./',
-		'index.html',
+		...pages,
 		'manifest.webmanifest',
-		...ANIMATIONS.map((a) => a.fichier),
 		'polices/polices.css',
 		...listePolices.map((f) => `polices/${f}`),
 		'icones/icone-180.png',
@@ -269,4 +306,4 @@ writeFileSync(
 		'icones/icone-masque-512.png'
 	])
 );
-console.log(`construit : ${ANIMATIONS.length} animations dans ${SORTIE}`);
+console.log(`construit dans ${SORTIE}`);

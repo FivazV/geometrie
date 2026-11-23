@@ -1,14 +1,17 @@
-// Le cache de l'application « Géométrie » : tout est gardé sur le téléphone à la première visite.
-// À chaque visite avec connexion, la page servie vient du cache (instantané) et sa copie est rafraîchie en arrière-plan.
-const CACHE = 'geometrie-2026-11-23a';
+// Le cache de l'application : tout est gardé sur le téléphone à la première visite.
+// LES PAGES : le réseau d'abord — avec une connexion, l'élève voit toujours la dernière version, sans rien rafraîchir ;
+// sans connexion (ou si le réseau traîne plus de 4 secondes), la copie gardée sur le téléphone.
+// LE RESTE (polices, icônes) : la copie gardée d'abord, rafraîchie en arrière-plan.
+const CACHE = 'geometrie-2026-11-23b';
 const FICHIERS = [
 	"./",
 	"index.html",
-	"manifest.webmanifest",
+	"espace.html",
 	"mediatrice.html",
 	"bissectrice.html",
 	"cercle-circonscrit.html",
 	"cercle-inscrit.html",
+	"manifest.webmanifest",
 	"polices/polices.css",
 	"polices/bricolage-grotesque-1.woff2",
 	"polices/figtree-2.woff2",
@@ -30,18 +33,23 @@ self.addEventListener('activate', (e) => {
 			.then(() => self.clients.claim())
 	);
 });
+const estUnePage = (req) => req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
 self.addEventListener('fetch', (e) => {
 	if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
 	e.respondWith(
 		caches.open(CACHE).then(async (c) => {
 			const enCache = await c.match(e.request, { ignoreSearch: true });
-			const reseau = fetch(e.request)
-				.then((r) => {
-					if (r.ok) c.put(e.request, r.clone());
-					return r;
-				})
-				.catch(() => enCache);
-			return enCache || reseau;
+			const reseau = fetch(e.request, estUnePage(e.request) ? { cache: 'no-cache' } : undefined).then((r) => {
+				if (r.ok) c.put(e.request, r.clone());
+				return r;
+			});
+			if (!estUnePage(e.request)) {
+				reseau.catch(() => {});
+				return enCache || reseau;
+			}
+			if (!enCache) return reseau;
+			const patience = new Promise((ok) => setTimeout(() => ok(enCache), 4000));
+			return Promise.race([reseau.catch(() => enCache), patience]);
 		})
 	);
 });
