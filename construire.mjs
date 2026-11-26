@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const SORTIE = resolve(ICI, 'docs');
-const VERSION = '2026-11-23d';
+const VERSION = '2026-11-26a';
 
 const TUILES = [
 	{
@@ -42,6 +42,15 @@ const TUILES = [
 					{ source: 'Bissectrice_au_compas_1.html', fichier: 'bissectrice.html' },
 					{ source: 'Cercle_circonscrit_au_compas_1.html', fichier: 'cercle-circonscrit.html' },
 					{ source: 'Cercle_inscrit_au_compas_1.html', fichier: 'cercle-inscrit.html' }
+				]
+			},
+			{
+				// (26.11 : ces deux explications viennent d'un autre dossier que le reste de la tuile — `dossier` le dit.)
+				titre: 'Les angles — explications',
+				dossier: 'C:/Users/Enseignant/Desktop/MAT/Application_F',
+				animations: [
+					{ source: 'Explication_Angles_triangles.html', fichier: 'angles-triangles.html' },
+					{ source: 'Explication_Angles_quadrilateres.html', fichier: 'angles-quadrilateres.html' }
 				]
 			},
 			{
@@ -300,8 +309,9 @@ await polices();
 for (const t of TUILES) {
 	const copies = resolve(ICI, 'sources', t.page.replace('.html', ''));
 	mkdirSync(copies, { recursive: true });
-	for (const a of t.rubriques.flatMap((r) => r.animations)) {
-		const origine = resolve(t.dossier, a.source);
+	// (Une rubrique peut venir d'un autre dossier que sa tuile : `dossier` sur la rubrique passe devant celui de la tuile.)
+	for (const a of t.rubriques.flatMap((r) => r.animations.map((x) => Object.assign(x, { dossier: r.dossier ?? t.dossier })))) {
+		const origine = resolve(a.dossier, a.source);
 		a.chemin = resolve(copies, a.source);
 		if (existsSync(origine)) copyFileSync(origine, a.chemin);
 		else if (existsSync(a.chemin)) console.log(`(disque absent : copie locale de ${a.source})`);
