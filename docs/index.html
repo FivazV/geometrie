@@ -36,16 +36,24 @@ h2{font:700 1.15rem/1.3 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;ma
 details{margin-top:26px;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:14px 18px}
 summary{font-weight:600;cursor:pointer}
 details p{margin:10px 0 0}
+.bientot{background:var(--carte);border:1px dashed var(--trait);border-radius:14px;padding:18px;color:var(--doux);margin-top:10px}
+.bleu{--bleu:#1d4e89;--bleu-doux:#e2ecf7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bleu{--bleu:#7fb2ea;--bleu-doux:#1b2f44}}
+:root[data-theme="dark"] .bleu{--bleu:#7fb2ea;--bleu-doux:#1b2f44}
+.vert{--bleu:#52a93f;--bleu-doux:#e4efd7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .vert{--bleu:#8fcf7c;--bleu-doux:#1e3320}}
+:root[data-theme="dark"] .vert{--bleu:#8fcf7c;--bleu-doux:#1e3320}
 </style>
 </head>
-<body>
+<body class="bleu">
 <main>
 <header>
 <img src="icones/icone-192.png" alt="">
 <div><h1>Maths</h1><p>Choisis un domaine.</p></div>
 </header>
 <ul class="tuiles">
-<li><a href="espace.html"><strong>ESPACE</strong><span>Les constructions pas à pas, et les corrections de la remédiation.</span></a></li>
+<li><a class="bleu" href="espace.html"><strong>ESPACE</strong><span>Les constructions pas à pas, et les corrections de la remédiation.</span></a></li>
+<li><a class="vert" href="grandeurs.html"><strong>GRANDEURS ET MESURES</strong><span>Les premières animations arrivent bientôt.</span></a></li>
 </ul>
 <details>
 <summary>Mettre cette page sur l’écran de mon téléphone</summary>

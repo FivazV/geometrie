@@ -24,12 +24,13 @@ import { fileURLToPath } from 'node:url';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const SORTIE = resolve(ICI, 'docs');
-const VERSION = '2026-11-26a';
+const VERSION = '2026-11-26b';
 
 const TUILES = [
 	{
 		nom: 'ESPACE',
 		page: 'espace.html',
+		couleur: 'bleu',
 		texte: 'Les constructions pas à pas, et les corrections de la remédiation.',
 		dossier: 'E:/Ecole/Espace/Application',
 		// Une tuile range ses animations en RUBRIQUES. `numero` : le numéro de l'exercice, écrit devant l'intitulé
@@ -66,8 +67,24 @@ const TUILES = [
 				]
 			}
 		]
+	},
+	{
+		// (26.11 : tuile ouverte avant ses animations — sa page dit qu'elles arrivent bientôt.)
+		nom: 'GRANDEURS ET MESURES',
+		page: 'grandeurs.html',
+		couleur: 'vert',
+		texte: 'Les premières animations arrivent bientôt.',
+		dossier: 'C:/Users/Enseignant/Desktop/MAT/Application_F',
+		rubriques: []
 	}
 ];
+
+// LES COULEURS DES TUILES. `fond` : la tuile, les boutons, les numéros ; `doux` : le fond d'une ligne touchée.
+// En mode sombre, une teinte plus claire, posée sur le fond sombre. (Le vert : celui de l'enseignant, 26.11.)
+const COULEURS = {
+	bleu: { fond: '#1d4e89', doux: '#e2ecf7', sombre: '#7fb2ea', sombreDoux: '#1b2f44' },
+	vert: { fond: '#52a93f', doux: '#e4efd7', sombre: '#8fcf7c', sombreDoux: '#1e3320' }
+};
 
 // ── Les polices, copiées une fois dans `polices/` (gardées d'une construction à l'autre) ─────────────────────────
 const POLICES = resolve(ICI, 'polices');
@@ -128,8 +145,8 @@ const TETE_COMMUNE = `<link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="Maths">`;
 const SERVICE = `<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>`;
 // (Dans le flux de la page, au-dessus du titre : en position fixe, il recouvrait le titre de l'animation.)
-const retour = (href, nom) =>
-	`<div style="padding:12px 16px 0"><a href="${href}" style="display:inline-block;padding:8px 14px;border-radius:999px;background:#1d4e89;color:#fff;font:600 15px/1 system-ui,sans-serif;text-decoration:none">← ${nom}</a></div>`;
+const retour = (href, nom, couleur) =>
+	`<div style="padding:12px 16px 0"><a href="${href}" style="display:inline-block;padding:8px 14px;border-radius:999px;background:${COULEURS[couleur].fond};color:#fff;font:600 15px/1 system-ui,sans-serif;text-decoration:none">← ${nom}</a></div>`;
 const echapper = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /** Copie une animation dans le site ; rend l'intitulé qu'elle affiche (son grand titre). */
@@ -150,7 +167,7 @@ function animation(tuile, a) {
 	if (/fonts\.(googleapis|gstatic)\.com/.test(s)) throw new Error(`${a.source} : il reste un appel à Google`);
 	if (!s.includes('</head>') || !/<body[^>]*>/.test(s)) throw new Error(`${a.source} : page inattendue`);
 	s = s.replace('</head>', () => `<link rel="stylesheet" href="polices/polices.css">\n${TETE_COMMUNE}\n</head>`);
-	s = s.replace(/<body[^>]*>/, (m) => `${m}\n${retour(tuile.page, tuile.nom[0] + tuile.nom.slice(1).toLowerCase())}`);
+	s = s.replace(/<body[^>]*>/, (m) => `${m}\n${retour(tuile.page, tuile.nom[0] + tuile.nom.slice(1).toLowerCase(), tuile.couleur)}`);
 	s = s.replace('</body>', () => `${SERVICE}\n</body>`);
 	writeFileSync(resolve(SORTIE, a.fichier), s);
 	return intitule;
@@ -179,8 +196,16 @@ h2{font:700 1.15rem/1.3 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;ma
 .retour{display:inline-block;margin-top:14px;padding:8px 14px;border-radius:999px;background:var(--bleu);color:var(--sur-bleu);font:600 15px/1 system-ui,sans-serif;text-decoration:none}
 details{margin-top:26px;background:var(--carte);border:1px solid var(--trait);border-radius:14px;padding:14px 18px}
 summary{font-weight:600;cursor:pointer}
-details p{margin:10px 0 0}`;
-const page = (titre, corps) => `<!doctype html>
+details p{margin:10px 0 0}
+.bientot{background:var(--carte);border:1px dashed var(--trait);border-radius:14px;padding:18px;color:var(--doux);margin-top:10px}
+${Object.entries(COULEURS)
+	.map(
+		([nom, c]) => `.${nom}{--bleu:${c.fond};--bleu-doux:${c.doux}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .${nom}{--bleu:${c.sombre};--bleu-doux:${c.sombreDoux}}}
+:root[data-theme="dark"] .${nom}{--bleu:${c.sombre};--bleu-doux:${c.sombreDoux}}`
+	)
+	.join('\n')}`;
+const page = (titre, corps, couleur = 'bleu') => `<!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -191,7 +216,7 @@ ${TETE_COMMUNE}
 <style>${STYLE}
 </style>
 </head>
-<body>
+<body class="${couleur}">
 <main>
 ${corps}
 </main>
@@ -208,7 +233,7 @@ const accueil = () =>
 <div><h1>Maths</h1><p>Choisis un domaine.</p></div>
 </header>
 <ul class="tuiles">
-${TUILES.map((t) => `<li><a href="${t.page}"><strong>${t.nom}</strong><span>${echapper(t.texte)}</span></a></li>`).join('\n')}
+${TUILES.map((t) => `<li><a class="${t.couleur}" href="${t.page}"><strong>${t.nom}</strong><span>${echapper(t.texte)}</span></a></li>`).join('\n')}
 </ul>
 <details>
 <summary>Mettre cette page sur l’écran de mon téléphone</summary>
@@ -223,8 +248,9 @@ const domaine = (t, intitules) =>
 		`${t.nom} — Maths`,
 		`<a class="retour" href="./">← Accueil</a>
 <header>
-<div><h1>${t.nom}</h1><p>${echapper(t.texte)}</p></div>
+<div><h1>${t.nom}</h1>${t.rubriques.length ? `<p>${echapper(t.texte)}</p>` : ''}</div>
 </header>
+${t.rubriques.length ? '' : '<p class="bientot">Les premières animations arrivent bientôt.</p>'}
 ${t.rubriques
 	.map(
 		(r) => `<h2>${echapper(r.titre)}</h2>
@@ -237,7 +263,8 @@ ${r.animations
 	.join('\n')}
 </ul>`
 	)
-	.join('\n')}`
+	.join('\n')}`,
+		t.couleur
 	);
 
 const manifeste = () =>

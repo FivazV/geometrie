@@ -81,7 +81,9 @@ for (const tuile of tuiles) {
 			intitule: a.querySelector('.intitule').textContent.trim()
 		}))
 	);
-	if (!animations.length) problemes.push(`${tuile.nom} : aucune animation`);
+	// (Une tuile sans animation dit qu'elles arrivent bientôt.)
+	if (!animations.length && !(await page.locator('.bientot').count()))
+		problemes.push(`${tuile.nom} : aucune animation`);
 	console.log(`${tuile.nom} : ${animations.length} animations`);
 	for (const a of animations) {
 		await page.goto(BASE + tuile.href, { waitUntil: 'networkidle' });
