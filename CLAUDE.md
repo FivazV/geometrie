@@ -34,7 +34,8 @@ Les sources lues sont recopiées dans `sources/` : la construction marche même 
 
 Deux tuiles. ESPACE (bleue), treize animations : quatre constructions au compas, deux explications sur les angles
 (triangles, quadrilatères), sept corrections de remédiation. Laissés de côté : « Calculs d'angles ES94 » et l'évaluation
-(trop lourde). GRANDEURS ET MESURES (verte, `grandeurs.html`), en ligne mais encore vide : sa page dit « bientôt ». Son
-texte sous le titre est provisoire, à remplacer avec les premières animations. Chaque tuile a sa `couleur` (liste
-`COULEURS` dans `construire.mjs`).
+(trop lourde). GRANDEURS ET MESURES (verte, `grandeurs.html`), une animation : « Périmètre et aire : les notions
+initiales » (27.11), écrite par Claude d'après le document de l'enseignant `E:/Ecole/Maths_F/GM_Notions_Initiales.docx`
+et enregistrée à côté de lui (`GM_Notions_Initiales.html`) : c'est ce fichier qu'on retouche, puis on reconstruit.
+Ces notions peuvent encore changer. Chaque tuile a sa `couleur` (liste `COULEURS` dans `construire.mjs`).
 Le QR code et la feuille à projeter sont dans `qr/`.

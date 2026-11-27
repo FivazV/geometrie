@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:light}body{margin:0}</style>
+<title>Périmètre et aire : les notions initiales</title>
+<style>
+/* Grandeurs et mesures — notions initiales (27.11.2026). Même mise en page que les explications sur les angles :
+   une scène de papier quadrillé (1 carreau = 1 cm), une carte d'explication et les commandes. */
+:root{
+  --desk:#dde4ea; --paper:#fdfdfb; --grid:#d5e0ec;
+  --ink:#1d2733; --muted:#566272; --line:#c3ceda;
+  --accent:#e0452b; --circle:#17825f; --construct:#2563a8; --orange:#d97706; --violet:#7c4dde;
+  --card:#f3f6f9; --chip:#e6ecf2; --chip-on:#1d2733; --chip-on-fg:#ffffff;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-math:"Newsreader","Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --desk:#12171c; --paper:#232b33; --grid:#2d3843;
+  --ink:#e8edf2; --muted:#9aa8b6; --line:#35414d;
+  --accent:#ff6b4f; --circle:#4fd1a1; --construct:#6fb0f0; --orange:#f0a03c; --violet:#a98bf5;
+  --card:#1a2027; --chip:#252e37; --chip-on:#e8edf2; --chip-on-fg:#12171c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#12171c; --paper:#232b33; --grid:#2d3843;
+  --ink:#e8edf2; --muted:#9aa8b6; --line:#35414d;
+  --accent:#ff6b4f; --circle:#4fd1a1; --construct:#6fb0f0; --orange:#f0a03c; --violet:#a98bf5;
+  --card:#1a2027; --chip:#252e37; --chip-on:#e8edf2; --chip-on-fg:#12171c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.1;margin:0;text-wrap:balance}
+.sub{margin:4px 0 0;color:var(--muted);max-width:60ch}
+.stage{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--paper);box-shadow:0 10px 30px rgba(10,20,30,.14)}
+.stage svg{display:block;width:100%;height:auto}
+.panel{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.panel>.card:first-child{min-height:280px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.badge{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card h2{font-family:var(--f-display);font-size:1.3rem;line-height:1.2;margin:4px 0 6px;text-wrap:balance}
+.card p{margin:0 0 8px}
+.gesture{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-weight:500}
+.gesture::before{content:"";flex:none;width:10px;height:10px;margin-top:7px;border-radius:50%;background:var(--accent)}
+.ctrl{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select{font:inherit;color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600}
+.btn.main{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on);min-width:7.5rem}
+.btn:focus-visible,.chip:focus-visible,select:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--construct);outline-offset:2px}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:8px 12px;cursor:pointer;min-width:0}
+.chip b{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--paper);border:1px solid var(--line);font-size:.8rem}
+.chip.on{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on)}
+.chip.on b{background:var(--accent);border-color:var(--accent);color:#fff}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.speed{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.9rem}
+select{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+@media (max-width:720px){.panel{grid-template-columns:minmax(0,1fr)}}
+/* La scène */
+.pl,.x,.th{fill:none;stroke-linecap:round;stroke-linejoin:round}.pl{stroke-width:3.4}.x{stroke-width:2.4}.th{stroke-width:1.2}
+.sk{stroke:var(--ink)}.sm{stroke:var(--muted)}.sa{stroke:var(--accent)}.sc{stroke:var(--construct)}.sg{stroke:var(--circle)}.ds{stroke-dasharray:8 7}
+.fc{fill:var(--construct);fill-opacity:.16;stroke:none}.fa{fill:var(--accent);fill-opacity:.22}
+.dot{fill:var(--accent)}
+.lbl{font-family:var(--f-math);font-style:italic;font-weight:500;font-size:28px;fill:var(--ink)}
+.eq{font-family:var(--f-math);font-size:31px;fill:var(--ink)}.eq.r{fill:var(--accent);font-weight:600}
+.hd{font-family:var(--f-display);font-size:27px;font-weight:700;fill:var(--ink)}
+.note{font-family:var(--f-body);font-size:23px;fill:var(--muted)}
+.big{font-family:var(--f-math);font-size:48px;fill:var(--ink)}
+.tag{font-family:var(--f-display);font-size:22px;font-weight:700}
+.num{font-family:var(--f-display);font-size:18px;font-weight:700;fill:#fff}
+.mot{font-family:var(--f-display);font-size:21px;font-weight:600}
+.ta{fill:var(--accent)}.tc{fill:var(--construct)}.tg{fill:var(--circle)}
+</style>
+<link rel="stylesheet" href="polices/polices.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d4e89">
+<link rel="icon" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Maths">
+</head>
+<body>
+<div style="padding:12px 16px 0"><a href="grandeurs.html" style="display:inline-block;padding:8px 14px;border-radius:999px;background:#52a93f;color:#fff;font:600 15px/1 system-ui,sans-serif;text-decoration:none">← Grandeurs et mesures</a></div>
+
+<div class="wrap">
+  <header>
+    <h1>Périmètre et aire : les notions initiales</h1>
+    <p class="sub">Le périmètre, l’aire, et comment écrire un calcul. Tu peux mettre en pause, avancer à la main ou choisir une partie.</p>
+  </header>
+
+  <div class="stage">
+  <svg id="scene" viewBox="0 0 900 600" role="img" aria-label="Animation : calcul du périmètre et de l’aire d’un rectangle, puis les cinq éléments d’un calcul.">
+    <defs>
+      <pattern id="g1" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" style="stroke:var(--grid)" stroke-width="1"/></pattern>
+    </defs>
+    <rect width="900" height="600" style="fill:var(--paper)"/>
+    <rect width="900" height="600" fill="url(#g1)"/>
+    <g id="g"></g>
+  </svg>
+  </div>
+
+  <div class="panel">
+    <section class="card" aria-live="polite">
+      <div class="badge" id="badge"></div>
+      <h2 id="title"></h2>
+      <p id="text"></p>
+      <div class="gesture" id="gesture"></div>
+    </section>
+
+    <section class="card ctrl" aria-label="Commandes">
+      <div class="row">
+        <button class="btn main" id="play" type="button">Pause</button>
+        <button class="btn" id="restart" type="button">Recommencer</button>
+      </div>
+      <label class="speed" for="seek">Avancer à la main
+        <input id="seek" type="range" min="0" max="1000" value="0" step="1">
+      </label>
+      <div class="chips" id="chips"></div>
+      <div class="speed"><label for="speed">Vitesse</label>
+        <select id="speed"><option value="0.6">Lente</option><option value="1" selected>Normale</option><option value="1.5">Rapide</option></select>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var NS="http://www.w3.org/2000/svg",G=$("g");
+function clamp(x,a,b){return Math.min(b,Math.max(a,x))}
+function ease(f){return f<.5?4*f*f*f:1-Math.pow(-2*f+2,3)/2}
+function F(p,a,b){return clamp((p-a)/(b-a),0,1)}
+function el(tag,at,txt,parent){var e=document.createElementNS(NS,tag);for(var k in at)if(at[k]!=null)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;(parent||G).appendChild(e);return e}
+function T(x,y,txt,cls,op,anc,style){return el("text",{x:x,y:y,"class":cls,"text-anchor":anc||"start",opacity:op,style:style},txt)}
+/* Un texte en morceaux : [texte, classe, attributs]. */
+function TS(x,y,parts,cls,op,anc){var e=T(x,y,null,cls,op,anc);parts.forEach(function(p){var a=p[2]||{};a["class"]=p[1]||null;el("tspan",a,p[0],e)});return e}
+function L(x1,y1,x2,y2,cls,op){return el("path",{d:"M"+x1+" "+y1+"L"+x2+" "+y2,"class":cls,opacity:op})}
+function R(x,y,w,h,cls,op,style){return el("rect",{x:x,y:y,width:w,height:h,"class":cls,opacity:op,style:style})}
+function head(x,y,dx,dy,cls){var n=Math.hypot(dx,dy),ux=dx/n,uy=dy/n,s=13;
+  return el("path",{d:"M"+(x-ux*s-uy*s*.55)+" "+(y-uy*s+ux*s*.55)+"L"+x+" "+y+"L"+(x-ux*s+uy*s*.55)+" "+(y-uy*s-ux*s*.55),"class":cls})}
+/* Une flèche de mesure qui se déploie de (x1,y1) vers (x2,y2). */
+function arrow(x1,y1,x2,y2,p,cls){if(p<=0)return;var x=x1+(x2-x1)*p,y=y1+(y2-y1)*p;L(x1,y1,x,y,cls);head(x1,y1,x1-x2,y1-y2,cls);head(x,y,x2-x1,y2-y1,cls)}
+
+/* Le rectangle des trois premières parties : 6 cm sur 4 cm (1 carreau = 1 cm = 50). */
+var X=150,Y=200,U=50,W=6*U,H=4*U,EX=565;
+function dh(p){ // la distance horizontale, sous le rectangle
+  if(p<=0)return;L(X,Y+H+12,X,Y+H+56,"th sm",p);L(X+W,Y+H+12,X+W,Y+H+56,"th sm",p);
+  arrow(X,Y+H+40,X+W,Y+H+40,ease(p),"x sc");
+  TS(X+W/2,Y+H+82,[["dh","tc"],[" = 6 cm"]],"lbl",F(p,.6,1),"middle")}
+function dv(p){ // la distance verticale, à gauche du rectangle
+  if(p<=0)return;L(X-12,Y+H,X-56,Y+H,"th sm",p);L(X-12,Y,X-56,Y,"th sm",p);
+  arrow(X-40,Y+H,X-40,Y,ease(p),"x sg");
+  T(X-52,Y+H/2-4,"dv","lbl tg",F(p,.6,1),"end");T(X-52,Y+H/2+28,"4 cm","lbl",F(p,.6,1),"end")}
+
+var STEPS=[
+{chip:"Le périmètre",badge:"Périmètre",title:"Le périmètre : on mesure une distance",
+ text:"Le périmètre, c’est la longueur du tour d’une figure. On additionne les longueurs de tous les côtés. Le résultat est une distance : il s’exprime en mm, cm, dm, m, dam, hm ou km.",
+ acts:[[3000,"Voici un rectangle. Son périmètre, c’est la longueur de son tour."],
+       [2300,"On part d’un coin et on suit le bord : 6 cm."],
+       [2100,"On tourne : 4 cm."],
+       [2300,"Encore 6 cm."],
+       [2100,"Et 4 cm pour revenir au départ."],
+       [3600,"On additionne : 6 + 4 + 6 + 4 = 20. Le périmètre vaut 20 cm."],
+       [3600,"Un périmètre est une distance : on l’exprime en mm, cm, dm, m, dam, hm ou km."]],
+ draw:function(q){
+  var o=q(0);R(X,Y,W,H,"x sm ds",F(o,0,.4));
+  T(EX,110,"Calcul de périmètre","hd",F(o,.3,.7));T(EX,150,"On mesure une distance.","note",F(o,.5,1));
+  var C=[[X,Y],[X+W,Y],[X+W,Y+H],[X,Y+H],[X,Y]],LB=[[X+W/2,Y-16,"6 cm","middle"],[X+W+14,Y+H/2+9,"4 cm","start"],[X+W/2,Y+H+38,"6 cm","middle"],[X-14,Y+H/2+9,"4 cm","end"]],n=0;
+  for(var k=0;k<4;k++){var s=q(k+1);if(s<=0)continue;var e=ease(Math.min(1,s/.75)),a=C[k],b=C[k+1],x=a[0]+(b[0]-a[0])*e,y=a[1]+(b[1]-a[1])*e;
+    L(a[0],a[1],x,y,"pl sa");if(s<1)el("circle",{cx:x,cy:y,r:7,"class":"dot"});T(LB[k][0],LB[k][1],LB[k][2],"lbl ta",F(s,.7,1),LB[k][3]);if(s>=.75)n=k+1}
+  if(n)T(EX,240,"P = "+[6,4,6,4].slice(0,n).join(" + "),"eq");
+  var f=q(5);T(EX,300,"P = 20 cm","eq r",F(f,0,.4));
+  var u=q(6);T(EX,380,"Unités de mesure :","note",F(u,0,.4));T(EX,415,"mm, cm, dm, m,","note",F(u,.2,.6));T(EX,450,"dam, hm, km","note",F(u,.3,.7))}},
+
+{chip:"L’aire : dh × dv",badge:"Aire",title:"L’aire : on mesure une surface",
+ text:"L’aire, c’est la surface à l’intérieur de la figure. Pour la calculer, on multiplie une distance horizontale (dh) par une distance verticale (dv) : A = dh × dv. Elle s’exprime en mm², cm², dm², m², a, ha ou km².",
+ acts:[[3000,"Le même rectangle. Cette fois, on s’intéresse à l’intérieur : sa surface."],
+       [2800,"La distance horizontale, dh : 6 cm."],
+       [2800,"La distance verticale, dv : 4 cm."],
+       [3600,"Pour calculer l’aire, on multiplie la distance horizontale par la distance verticale."],
+       [3800,"Une aire s’exprime avec un petit 2 : cm² se lit « centimètre carré »."]],
+ draw:function(q){
+  var o=q(0);R(X,Y,W,H,"fc",F(o,.2,.9));R(X,Y,W,H,"pl sk",F(o,0,.4));
+  T(EX,110,"Calcul d’aire","hd",F(o,.3,.7));T(EX,150,"On mesure une surface.","note",F(o,.5,1));
+  dh(q(1));dv(q(2));
+  TS(EX,240,[["A = "],["dh","tc"],[" × "],["dv","tg"]],"eq",F(q(3),0,.4));
+  var u=q(4);T(EX,380,"Unités de mesure :","note",F(u,0,.4));T(EX,415,"mm², cm², dm², m²,","note",F(u,.2,.6));T(EX,450,"a, ha, km²","note",F(u,.3,.7))}},
+
+{chip:"Pourquoi on multiplie",badge:"Pourquoi dh × dv ?",title:"On empile des distances horizontales",
+ text:"On fait monter la distance horizontale le long de la distance verticale. À chaque centimètre, elle balaie une rangée de 6 carrés de 1 cm². Avec 4 rangées, on obtient 6 × 4 = 24 cm² : les distances empilées forment une surface.",
+ acts:[[3200,"Voici la distance horizontale : 6 cm. Et à gauche, la distance verticale : 4 cm."],
+       [2600,"On fait monter la distance horizontale de 1 cm : elle balaie une rangée de 6 carrés. 6 cm²."],
+       [2200,"On l’empile encore de 1 cm : 2 rangées, 12 cm²."],
+       [2200,"3 rangées : 18 cm²."],
+       [2400,"4 rangées : on a monté toute la distance verticale. La surface est remplie : 24 cm²."],
+       [4000,"4 rangées de 6 carrés : c’est 6 × 4. Voilà pourquoi on multiplie dh par dv."],
+       [3600,"Chaque petit carré mesure 1 cm sur 1 cm : son aire vaut 1 cm²."]],
+ draw:function(q){
+  var o=q(0);R(X,Y,W,H,"x sm ds",F(o,0,.4));dv(F(o,.2,.8));
+  var h=0;for(var k=1;k<=4;k++)h+=ease(q(k));
+  if(h>0)R(X,Y+H-h*U,W,h*U,"fc");
+  var full=Math.floor(h+1e-6);
+  for(var r=0;r<full;r++){var yr=Y+H-(r+1)*U;L(X,yr,X+W,yr,"th sc");for(var c=1;c<6;c++)L(X+c*U,yr,X+c*U,yr+U,"th sc")}
+  var yt=Y+H-h*U;L(X,yt,X+W,yt,"pl sc",F(o,0,.3));
+  if(o>0){L(X,Y+H+12,X,Y+H+56,"th sm",o);L(X+W,Y+H+12,X+W,Y+H+56,"th sm",o);arrow(X,Y+H+40,X+W,Y+H+40,1,"x sc");TS(X+W/2,Y+H+82,[["dh","tc"],[" = 6 cm"]],"lbl",F(o,0,.4),"middle")}
+  T(EX,110,"On empile les rangées","hd",F(o,.3,.7));
+  for(k=1;k<=4;k++)T(EX,150+45*k,k+(k>1?" rangées":" rangée")+" → "+6*k+" cm²","eq",F(q(k),.8,1));
+  var m=q(5);TS(EX,410,[["A = "],["dh","tc"],[" × "],["dv","tg"]],"eq",F(m,0,.3));T(EX,460,"A = 6 × 4 = 24 cm²","eq r",F(m,.3,.6));
+  var s=q(6);if(s>0){R(X,Y,U,U,"fa x sa",F(s,0,.4));T(X+U/2,Y-14,"1 cm²","lbl ta",F(s,.3,.7),"middle")}}},
+
+{chip:"Les 5 éléments d’un calcul",badge:"Formules et calculs",title:"Les 5 éléments d’un calcul",
+ text:"Dans chaque calcul de ce chapitre, on montre son raisonnement avec 5 éléments : ce que l’on cherche, la formule, le calcul, la réponse et l’unité de mesure.",
+ acts:[[3000,"Exemple : l’aire d’un carré de 5 cm de côté."],
+       [3200,"1 · Ce que je cherche : l’aire du carré, A carré."],
+       [3200,"2 · La formule : pour un carré, A = C² (côté × côté)."],
+       [3200,"3 · Le calcul : on remplace C par 5, donc 5 × 5."],
+       [3000,"4 · La réponse : 25."],
+       [3200,"5 · L’unité de mesure : des cm², car c’est une aire."],
+       [4000,"Les 5 éléments, toujours dans cet ordre : c’est ce qu’on attend dans chaque calcul."]],
+ draw:function(q){
+  var o=q(0),a=F(o,0,.5),S=40,x0=350,y0=30;
+  if(a>0){for(var i=1;i<5;i++){L(x0+i*S,y0,x0+i*S,y0+5*S,"th sm",.5*a);L(x0,y0+i*S,x0+5*S,y0+i*S,"th sm",.5*a)}
+    R(x0,y0,5*S,5*S,"pl sk",a);T(x0+2.5*S,y0+5*S+36,"C = 5 cm","lbl",F(o,.4,.9),"middle")}
+  var COL=["--accent","--construct","--circle","--orange","--violet"],
+      NOM=["1 · Ce que je cherche","2 · Formule","3 · Calcul","4 · Réponse","5 · Unité"],
+      P=[{t:[["A"],["carré",null,{dy:"10","font-size":"28"}]],cx:140,w:150,i:1},{t:[["="]],cx:250,i:2},{t:[["C²"]],cx:335,w:90,i:2},
+         {t:[["="]],cx:420,i:3},{t:[["5 × 5"]],cx:520,w:150,i:3},{t:[["="]],cx:620,i:4},{t:[["25"]],cx:690,w:84,i:4},{t:[["cm²"]],cx:790,w:104,i:5}],
+      YF=380;
+  P.forEach(function(p){var v=q(p.i),op=F(v,0,.35);if(op<=0)return;var col="var("+COL[p.i-1]+")";
+    if(p.w){R(p.cx-p.w/2,YF-46,p.w,64,null,op,"fill:"+col+";fill-opacity:.14;stroke:"+col+";stroke-width:2").setAttribute("rx","12");
+      var ly=p.i%2?452:516;L(p.cx,YF+20,p.cx,ly-26,null,op).setAttribute("style","stroke:"+col+";stroke-width:2");
+      T(p.cx,ly,NOM[p.i-1],"tag",F(v,.3,.7),"middle","fill:"+col)}
+    TS(p.cx,YF,p.t,"big",op,"middle")});
+  var f=q(6);if(f>0)T(450,575,"Ce que je cherche · Formule · Calcul · Réponse · Unité","note",F(f,.2,.6),"middle")}},
+
+{chip:"À retenir",badge:"Récapitulatif",title:"À retenir",
+ text:"Le périmètre mesure une distance, l’aire mesure une surface. Pour l’aire, on multiplie une distance horizontale par une distance verticale. Et chaque calcul montre ses 5 éléments.",
+ acts:[[3800,"Le périmètre : on fait le tour de la figure. C’est une distance."],
+       [3600,"L’aire : on remplit la surface à l’intérieur."],
+       [4000,"A = dh × dv : on empile la distance horizontale le long de la distance verticale."],
+       [4600,"Un calcul en 5 éléments : ce que je cherche, formule, calcul, réponse, unité."]],
+ draw:function(q){
+  /* Quatre petites figures, une par case : le moins de mots possible. */
+  L(450,30,450,570,"th sm",.35);L(30,300,870,300,"th sm",.35);
+  var u=28,w=6*u,h=4*u,x,y,k,r,c;
+  // 1. Le périmètre : le tour se dessine.
+  var a=q(0);
+  if(a>0){x=50;y=95;T(40,55,"Périmètre","hd",F(a,0,.2));R(x,y,w,h,"x sm ds",F(a,0,.2));
+    var pts=[[x,y],[x+w,y],[x+w,y+h],[x,y+h],[x,y]],left=2*(w+h)*ease(F(a,.1,.75)),path="M"+x+" "+y,tip=[x,y];
+    for(k=0;k<4&&left>0;k++){var A=pts[k],B=pts[k+1],len=Math.hypot(B[0]-A[0],B[1]-A[1]),f=Math.min(1,left/len);
+      tip=[A[0]+(B[0]-A[0])*f,A[1]+(B[1]-A[1])*f];path+="L"+tip[0]+" "+tip[1];left-=len}
+    el("path",{d:path,"class":"pl sa"});if(a<.75)el("circle",{cx:tip[0],cy:tip[1],r:7,"class":"dot"});
+    T(x+w/2,y-12,"6 cm","lbl ta",F(a,.25,.45),"middle");T(x+w+10,y+h/2+9,"4 cm","lbl ta",F(a,.35,.55));
+    T(302,y+h/2+12,"P = 20 cm","eq r",F(a,.8,1))}
+  // 2. L'aire : la surface se remplit de carreaux.
+  var b=q(1);
+  if(b>0){x=500;y=95;T(490,55,"Aire","hd",F(b,0,.2));R(x,y,w,h,"fc",F(b,.1,.5));
+    for(k=1;k<6;k++)L(x+k*u,y,x+k*u,y+h,"th sc",F(b,.3,.7));for(k=1;k<4;k++)L(x,y+k*u,x+w,y+k*u,"th sc",F(b,.3,.7));
+    R(x,y,w,h,"pl sk",F(b,0,.2));T(690,y+h/2+12,"A = 24 cm²","eq r",F(b,.75,1))}
+  // 3. dh × dv : les rangées s'empilent.
+  c=q(2);
+  if(c>0){x=90;y=380;TS(40,345,[["A = "],["dh","tc"],[" × "],["dv","tg"]],"hd",F(c,0,.2));R(x,y,w,h,"x sm ds",F(c,0,.2));
+    var hh=4*ease(F(c,.15,.8));if(hh>0)R(x,y+h-hh*u,w,hh*u,"fc");
+    for(r=0;r<Math.floor(hh+1e-6);r++){var yr=y+h-(r+1)*u;L(x,yr,x+w,yr,"th sc");for(k=1;k<6;k++)L(x+k*u,yr,x+k*u,yr+u,"th sc")}
+    L(x,y+h-hh*u,x+w,y+h-hh*u,"pl sc");
+    arrow(x,y+h+22,x+w,y+h+22,1,"x sc");T(x+w/2,y+h+56,"dh","lbl tc",1,"middle");
+    arrow(x-22,y+h,x-22,y,1,"x sg");T(x-34,y+h/2+9,"dv","lbl tg",1,"end");
+    T(300,y+h/2-4,"6 × 4","eq",F(c,.8,1));T(300,y+h/2+38,"= 24 cm²","eq r",F(c,.85,1))}
+  // 4. Les 5 éléments : cinq pastilles numérotées.
+  var e=q(3);
+  if(e>0){T(490,345,"Un calcul","hd",F(e,0,.2));
+    var COL=["--accent","--construct","--circle","--orange","--violet"],MOT=["cherche","formule","calcul","réponse","unité"],
+        PC=[{t:"A",cx:492,w:44},{t:"C²",cx:575,w:58},{t:"5 × 5",cx:684,w:92},{t:"25",cx:790,w:52},{t:"cm²",cx:857,w:66}],EQ=[530,621,747];
+    PC.forEach(function(p,i){var v=F(e,.08+i*.16,.22+i*.16);if(v<=0)return;var col="var("+COL[i]+")";
+      if(i&&EQ[i-1])T(EQ[i-1],442,"=","eq",v,"middle"); // (pas de « = » entre 25 et cm² : « 25 cm² » ne fait qu'un)
+      R(p.cx-p.w/2,405,p.w,52,null,v,"fill:"+col+";fill-opacity:.14;stroke:"+col+";stroke-width:2").setAttribute("rx","10");
+      el("circle",{cx:p.cx,cy:380,r:15,opacity:v,style:"fill:"+col});T(p.cx,386,String(i+1),"num",v,"middle");
+      T(p.cx,442,p.t,"eq",v,"middle");T(p.cx,i%2?524:492,MOT[i],"mot",v,"middle","fill:"+col)})}}}
+];
+
+/* Le déroulé : chaque partie est une suite de gestes ; le temps dit où l'on en est. */
+var START=[],total=0;
+STEPS.forEach(function(s){START.push(total);s.dur=s.acts.reduce(function(a,b){return a+b[0]},0);total+=s.dur});
+function locate(t){t=clamp(t,0,total);var i=STEPS.length-1;while(i>0&&START[i]>t)i--;var s=STEPS[i],l=t-START[i],a=0;
+  while(a<s.acts.length-1&&l>=s.acts[a][0]){l-=s.acts[a][0];a++}return {i:i,a:a,p:clamp(l/s.acts[a][0],0,1)}}
+var shown=-1,shownAct=-1;
+function render(t){var w=locate(t),s=STEPS[w.i];
+  while(G.firstChild)G.removeChild(G.firstChild);
+  s.draw(function(k){return k<w.a?1:k>w.a?0:w.p});
+  if(w.i!==shown){shown=w.i;shownAct=-1;$("badge").textContent=s.badge;$("title").textContent=s.title;$("text").textContent=s.text;
+    [].forEach.call($("chips").children,function(c,j){c.classList.toggle("on",j===w.i);c.setAttribute("aria-current",j===w.i?"step":"false")})}
+  if(w.a!==shownAct){shownAct=w.a;$("gesture").textContent=s.acts[w.a][1]}
+  $("seek").value=Math.round(1000*t/total)}
+
+STEPS.forEach(function(s,i){var b=document.createElement("button");b.type="button";b.className="chip";
+  b.innerHTML="<b>"+(i+1)+"</b><span></span>";b.lastChild.textContent=s.chip;
+  b.onclick=function(){time=START[i];setPlaying(true)};$("chips").appendChild(b)});
+
+var time=0,last=0,playing=true,speed=1;
+function setPlaying(v){playing=v;$("play").textContent=v?"Pause":"Lecture"}
+$("play").onclick=function(){if(!playing&&time>=total)time=0;setPlaying(!playing)};
+$("restart").onclick=function(){time=0;setPlaying(true)};
+$("seek").oninput=function(){time=this.value/1000*total;render(time)};
+$("speed").onchange=function(){speed=parseFloat(this.value)};
+function frame(ts){if(playing){time+=(ts-last)*speed;if(time>=total){time=total;setPlaying(false)}}last=ts;render(time);requestAnimationFrame(frame)}
+requestAnimationFrame(function(ts){last=ts;frame(ts)});
+})();
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>
+</body>
+</html>

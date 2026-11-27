@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const SORTIE = resolve(ICI, 'docs');
-const VERSION = '2026-11-26b';
+const VERSION = '2026-11-27a';
 
 const TUILES = [
 	{
@@ -69,13 +69,19 @@ const TUILES = [
 		]
 	},
 	{
-		// (26.11 : tuile ouverte avant ses animations — sa page dit qu'elles arrivent bientôt.)
+		// (Sans rubrique, sa page dit que les animations arrivent bientôt.)
 		nom: 'GRANDEURS ET MESURES',
 		page: 'grandeurs.html',
 		couleur: 'vert',
-		texte: 'Les premières animations arrivent bientôt.',
-		dossier: 'C:/Users/Enseignant/Desktop/MAT/Application_F',
-		rubriques: []
+		texte: 'Le périmètre, l’aire, et comment écrire un calcul.',
+		dossier: 'E:/Ecole/Maths_F',
+		rubriques: [
+			{
+				// (27.11 : animation écrite d'après le document « GM_Notions_Initiales » de l'enseignant.)
+				titre: 'Les notions initiales',
+				animations: [{ source: 'GM_Notions_Initiales.html', fichier: 'notions-initiales.html' }]
+			}
+		]
 	}
 ];
 
