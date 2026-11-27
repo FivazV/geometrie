@@ -2,7 +2,7 @@
 // LES PAGES : le réseau d'abord — avec une connexion, l'élève voit toujours la dernière version, sans rien rafraîchir ;
 // sans connexion (ou si le réseau traîne plus de 4 secondes), la copie gardée sur le téléphone.
 // LE RESTE (polices, icônes) : la copie gardée d'abord, rafraîchie en arrière-plan.
-const CACHE = 'geometrie-2026-11-27b';
+const CACHE = 'geometrie-2026-11-27c';
 const FICHIERS = [
 	"./",
 	"index.html",
@@ -22,6 +22,7 @@ const FICHIERS = [
 	"remediation-7.html",
 	"grandeurs.html",
 	"notions-initiales.html",
+	"triangle.html",
 	"manifest.webmanifest",
 	"polices/polices.css",
 	"polices/bricolage-grotesque-1.woff2",

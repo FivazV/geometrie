@@ -34,14 +34,19 @@ Les sources lues sont recopiées dans `sources/` : la construction marche même 
 
 Deux tuiles. ESPACE (bleue), treize animations : quatre constructions au compas, deux explications sur les angles
 (triangles, quadrilatères), sept corrections de remédiation. Laissés de côté : « Calculs d'angles ES94 » et l'évaluation
-(trop lourde). GRANDEURS ET MESURES (verte, `grandeurs.html`), une animation : « Périmètre et aire : les notions
+(trop lourde). GRANDEURS ET MESURES (verte, `grandeurs.html`), deux animations. La première : « Périmètre et aire : les notions
 initiales » (27.11), écrite par Claude d'après le document de l'enseignant `E:/Ecole/Maths_F/GM_Notions_Initiales.docx`
 et enregistrée à côté de lui (`GM_Notions_Initiales.html`) : c'est ce fichier qu'on retouche, puis on reconstruit.
 Ces notions peuvent encore changer. Chaque tuile a sa `couleur` (liste `COULEURS` dans `construire.mjs`).
 
-**À faire dès que le disque E: est rebranché** : la copie `sources/grandeurs/GM_Notions_Initiales.html` est plus récente
-que celle de E: (27.11 : étiquettes des 5 éléments agrandies, faite disque débranché). La recopier vers
-`E:/Ecole/Maths_F/` AVANT de construire, sinon la construction reprendrait l'ancienne version de E:.
+Si on retouche une animation pendant que E: est débranché (on modifie alors la copie de `sources/`), il faut recopier
+ce fichier vers E: dès son retour et AVANT de construire : sinon la construction reprend l'ancienne version de E:.
+
+Deuxième animation de GRANDEURS ET MESURES (rubrique « Le triangle », 27.11) : « Triangle – aire et périmètre »,
+`E:/Ecole/Maths_F/GM_Triangle.html`, écrite par Claude et validée par l'enseignant. Elle montre le périmètre, puis
+l'aire comme dh × dv divisé par 2 (triangle rectangle = moitié du rectangle), renommée base × hauteur sur 2, puis la
+même formule pour le triangle quelconque et celui dont la hauteur tombe à l'extérieur. L'enseignant veut les
+divisions écrites en **vraie fraction** (barre horizontale), jamais « / 2 ».
 
 **Prévu** (demande de l'enseignant, 27.11) : une animation par surface connue, toujours avec l'approche
 « distance horizontale × distance verticale » (des rangées de dh empilées sur dv). Elle sert ensuite à faire comprendre

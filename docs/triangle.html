@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html{color-scheme:light}body{margin:0}</style>
+<title>Triangle – aire et périmètre</title>
+<style>
+/* Grandeurs et mesures — le triangle (27.11.2026). Même mise en page que les notions initiales :
+   papier quadrillé (1 carreau = 1 cm), dh en bleu, dv en vert, les morceaux qu'on déplace en orange. */
+:root{
+  --desk:#dde4ea; --paper:#fdfdfb; --grid:#d5e0ec;
+  --ink:#1d2733; --muted:#566272; --line:#c3ceda;
+  --accent:#e0452b; --circle:#17825f; --construct:#2563a8; --orange:#d97706; --violet:#7c4dde;
+  --card:#f3f6f9; --chip:#e6ecf2; --chip-on:#1d2733; --chip-on-fg:#ffffff;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Figtree","Segoe UI",system-ui,sans-serif;
+  --f-math:"Newsreader","Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --desk:#12171c; --paper:#232b33; --grid:#2d3843;
+  --ink:#e8edf2; --muted:#9aa8b6; --line:#35414d;
+  --accent:#ff6b4f; --circle:#4fd1a1; --construct:#6fb0f0; --orange:#f0a03c; --violet:#a98bf5;
+  --card:#1a2027; --chip:#252e37; --chip-on:#e8edf2; --chip-on-fg:#12171c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --desk:#12171c; --paper:#232b33; --grid:#2d3843;
+  --ink:#e8edf2; --muted:#9aa8b6; --line:#35414d;
+  --accent:#ff6b4f; --circle:#4fd1a1; --construct:#6fb0f0; --orange:#f0a03c; --violet:#a98bf5;
+  --card:#1a2027; --chip:#252e37; --chip-on:#e8edf2; --chip-on-fg:#12171c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--desk);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.5rem,4vw,2.1rem);line-height:1.1;margin:0;text-wrap:balance}
+.sub{margin:4px 0 0;color:var(--muted);max-width:60ch}
+.stage{border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--paper);box-shadow:0 10px 30px rgba(10,20,30,.14)}
+.stage svg{display:block;width:100%;height:auto}
+.panel{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.panel>.card:first-child{min-height:280px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;min-width:0}
+.badge{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card h2{font-family:var(--f-display);font-size:1.3rem;line-height:1.2;margin:4px 0 6px;text-wrap:balance}
+.card p{margin:0 0 8px}
+.gesture{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-weight:500}
+.gesture::before{content:"";flex:none;width:10px;height:10px;margin-top:7px;border-radius:50%;background:var(--accent)}
+.ctrl{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select{font:inherit;color:var(--ink)}
+.btn{border:1px solid var(--line);background:var(--chip);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600}
+.btn.main{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on);min-width:7.5rem}
+.btn:focus-visible,.chip:focus-visible,select:focus-visible,input[type=range]:focus-visible{outline:3px solid var(--construct);outline-offset:2px}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{display:flex;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--chip);border-radius:10px;padding:8px 12px;cursor:pointer;min-width:0}
+.chip b{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--paper);border:1px solid var(--line);font-size:.8rem}
+.chip.on{background:var(--chip-on);color:var(--chip-on-fg);border-color:var(--chip-on)}
+.chip.on b{background:var(--accent);border-color:var(--accent);color:#fff}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.speed{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.9rem}
+select{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+@media (max-width:720px){.panel{grid-template-columns:minmax(0,1fr)}}
+/* La scène */
+.pl,.x,.th{fill:none;stroke-linecap:round;stroke-linejoin:round}.pl{stroke-width:3.4}.x{stroke-width:2.4}.th{stroke-width:1.2}
+.sk{stroke:var(--ink)}.sm{stroke:var(--muted)}.sa{stroke:var(--accent)}.sc{stroke:var(--construct)}.sg{stroke:var(--circle)}.so{stroke:var(--orange)}.ds{stroke-dasharray:8 7}
+.fc{fill:var(--construct);fill-opacity:.16;stroke:none}.fo{fill:var(--orange);fill-opacity:.32;stroke:none}.fg{fill:var(--circle);fill-opacity:.14;stroke:none}.fa{fill:var(--accent);fill-opacity:.22}
+.dot{fill:var(--accent)}
+.lbl{font-family:var(--f-math);font-style:italic;font-weight:500;font-size:28px;fill:var(--ink)}
+.eq{font-family:var(--f-math);font-size:31px;fill:var(--ink)}.eq.r{fill:var(--accent);font-weight:600}
+.hd{font-family:var(--f-display);font-size:27px;font-weight:700;fill:var(--ink)}
+.note{font-family:var(--f-body);font-size:23px;fill:var(--muted)}
+.big{font-family:var(--f-math);font-size:42px;fill:var(--ink)}
+.tag{font-family:var(--f-display);font-size:32px;font-weight:700}
+#g text{white-space:pre}
+.ta{fill:var(--accent)}.tc{fill:var(--construct)}.tg{fill:var(--circle)}.to{fill:var(--orange)}
+</style>
+<link rel="stylesheet" href="polices/polices.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d4e89">
+<link rel="icon" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Maths">
+</head>
+<body>
+<div style="padding:12px 16px 0"><a href="grandeurs.html" style="display:inline-block;padding:8px 14px;border-radius:999px;background:#52a93f;color:#fff;font:600 15px/1 system-ui,sans-serif;text-decoration:none">← Grandeurs et mesures</a></div>
+
+<div class="wrap">
+  <header>
+    <h1>Triangle – aire et périmètre</h1>
+    <p class="sub">Le tour du triangle, puis son aire : pourquoi on divise par 2, et pourquoi la formule marche pour tous les triangles. Tu peux mettre en pause, avancer à la main ou choisir une partie.</p>
+  </header>
+
+  <div class="stage">
+  <svg id="scene" viewBox="0 0 900 600" role="img" aria-label="Animation : périmètre et aire du triangle, démontrée à partir du rectangle.">
+    <defs>
+      <pattern id="g1" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M50 0H0V50" fill="none" style="stroke:var(--grid)" stroke-width="1"/></pattern>
+    </defs>
+    <rect width="900" height="600" style="fill:var(--paper)"/>
+    <rect width="900" height="600" fill="url(#g1)"/>
+    <g id="g"></g>
+  </svg>
+  </div>
+
+  <div class="panel">
+    <section class="card" aria-live="polite">
+      <div class="badge" id="badge"></div>
+      <h2 id="title"></h2>
+      <p id="text"></p>
+      <div class="gesture" id="gesture"></div>
+    </section>
+
+    <section class="card ctrl" aria-label="Commandes">
+      <div class="row">
+        <button class="btn main" id="play" type="button">Pause</button>
+        <button class="btn" id="restart" type="button">Recommencer</button>
+      </div>
+      <label class="speed" for="seek">Avancer à la main
+        <input id="seek" type="range" min="0" max="1000" value="0" step="1">
+      </label>
+      <div class="chips" id="chips"></div>
+      <div class="speed"><label for="speed">Vitesse</label>
+        <select id="speed"><option value="0.6">Lente</option><option value="1" selected>Normale</option><option value="1.5">Rapide</option></select>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var NS="http://www.w3.org/2000/svg",G=$("g");
+function clamp(x,a,b){return Math.min(b,Math.max(a,x))}
+function ease(f){return f<.5?4*f*f*f:1-Math.pow(-2*f+2,3)/2}
+function F(p,a,b){return clamp((p-a)/(b-a),0,1)}
+function el(tag,at,txt,parent){var e=document.createElementNS(NS,tag);for(var k in at)if(at[k]!=null)e.setAttribute(k,at[k]);if(txt!=null)e.textContent=txt;(parent||G).appendChild(e);return e}
+function T(x,y,txt,cls,op,anc,style){return el("text",{x:x,y:y,"class":cls,"text-anchor":anc||"start",opacity:op,style:style},txt)}
+/* Un texte en morceaux : [texte, classe, attributs]. */
+function TS(x,y,parts,cls,op,anc){var e=T(x,y,null,cls,op,anc);parts.forEach(function(p){var a=p[2]||{};a["class"]=p[1]||null;el("tspan",a,p[0],e)});return e}
+/* Une expression avec de vraies fractions (barre horizontale) : chaque morceau est soit une suite de [texte, classe],
+   soit {n: numérateur, d: dénominateur}. y est la ligne d'écriture ; la barre passe à mi-hauteur des chiffres. */
+function FR(x,y,items,cls,op,anc){if(op<=0)return;var g=el("g",{opacity:op}),cx=0,fs=0;
+  function fill(t,parts){parts.forEach(function(p){var a={};for(var k in (p[2]||{}))a[k]=p[2][k];a["class"]=p[1]||null;el("tspan",a,p[0],t)})}
+  items.forEach(function(it){
+    if(Array.isArray(it)){var t=el("text",{x:cx,y:0,"class":cls},null,g);fill(t,it);fs=fs||parseFloat(getComputedStyle(t).fontSize);cx+=t.getComputedTextLength()}
+    else{var n=el("text",{y:0,"class":cls,"text-anchor":"middle"},null,g),d=el("text",{y:0,"class":cls,"text-anchor":"middle"},null,g);fill(n,it.n);fill(d,it.d);
+      fs=fs||parseFloat(getComputedStyle(n).fontSize);var w=Math.max(n.getComputedTextLength(),d.getComputedTextLength())+fs*.35,m=cx+w/2,ax=-fs*.3;
+      n.setAttribute("x",m);n.setAttribute("y",ax-fs*.2);d.setAttribute("x",m);d.setAttribute("y",ax+fs*.9);
+      el("path",{d:"M"+(cx+fs*.1)+" "+ax+"H"+(cx+w-fs*.1),style:"fill:none;stroke-linecap:round;stroke:"+getComputedStyle(n).fill+";stroke-width:"+Math.max(1.6,fs*.06)},null,g);cx+=w}});
+  g.setAttribute("transform","translate("+(anc==="middle"?x-cx/2:anc==="end"?x-cx:x)+" "+y+")");return g}
+function H2(num){return {n:num,d:[["2"]]}} // « … divisé par 2 », en fraction
+function L(x1,y1,x2,y2,cls,op){return el("path",{d:"M"+x1+" "+y1+"L"+x2+" "+y2,"class":cls,opacity:op})}
+function R(x,y,w,h,cls,op,style){return el("rect",{x:x,y:y,width:w,height:h,"class":cls,opacity:op,style:style})}
+function poly(pts,cls,op){return el("path",{d:"M"+pts.map(function(p){return p[0].toFixed(1)+" "+p[1].toFixed(1)}).join("L")+"Z","class":cls,opacity:op})}
+/* Tourner des points autour d'un centre (en degrés) : les demi-tours qui montrent que deux morceaux sont pareils. */
+function rot(pts,c,deg){var a=deg*Math.PI/180,co=Math.cos(a),si=Math.sin(a);
+  return pts.map(function(p){var dx=p[0]-c[0],dy=p[1]-c[1];return [c[0]+dx*co-dy*si,c[1]+dx*si+dy*co]})}
+function move(pts,dx,dy){return pts.map(function(p){return [p[0]+dx,p[1]+dy]})}
+function head(x,y,dx,dy,cls){var n=Math.hypot(dx,dy),ux=dx/n,uy=dy/n,s=13;
+  return el("path",{d:"M"+(x-ux*s-uy*s*.55)+" "+(y-uy*s+ux*s*.55)+"L"+x+" "+y+"L"+(x-ux*s+uy*s*.55)+" "+(y-uy*s-ux*s*.55),"class":cls})}
+function arrow(x1,y1,x2,y2,p,cls){if(p<=0)return;var x=x1+(x2-x1)*p,y=y1+(y2-y1)*p;L(x1,y1,x,y,cls);head(x1,y1,x1-x2,y1-y2,cls);head(x,y,x2-x1,y2-y1,cls)}
+/* Le petit carré de l'angle droit, au pied de la hauteur (sx : côté où on le dessine, +1 droite, -1 gauche). */
+function droit(x,y,sx,op,s){s=s||18;el("path",{d:"M"+(x+sx*s)+" "+y+"L"+(x+sx*s)+" "+(y-s)+"L"+x+" "+(y-s),"class":"x sk",opacity:op})}
+/* Un tracé qui se dessine le long de plusieurs points, avec le point rouge au bout. */
+function trace(pts,p,cls,dot){var tot=0,i,seg=[];for(i=0;i<pts.length-1;i++){var l=Math.hypot(pts[i+1][0]-pts[i][0],pts[i+1][1]-pts[i][1]);seg.push(l);tot+=l}
+  var left=tot*p,d="M"+pts[0][0]+" "+pts[0][1],tip=pts[0];
+  for(i=0;i<seg.length&&left>0;i++){var f=Math.min(1,left/seg[i]);tip=[pts[i][0]+(pts[i+1][0]-pts[i][0])*f,pts[i][1]+(pts[i+1][1]-pts[i][1])*f];d+="L"+tip[0]+" "+tip[1];left-=seg[i]}
+  el("path",{d:d,"class":cls});if(dot&&p>0&&p<1)el("circle",{cx:tip[0],cy:tip[1],r:7,"class":"dot"})}
+
+/* Le rectangle de départ : 6 cm sur 4 cm (1 carreau = 1 cm = 50). */
+var X=150,Y=200,U=50,W=6*U,H=4*U;
+function grille(x,y,n,m,u,op){for(var i=1;i<n;i++)L(x+i*u,y,x+i*u,y+m*u,"th sm",op);for(i=1;i<m;i++)L(x,y+i*u,x+n*u,y+i*u,"th sm",op)}
+function dhArrow(p,txt){if(p<=0)return;L(X,Y+H+12,X,Y+H+56,"th sm",p);L(X+W,Y+H+12,X+W,Y+H+56,"th sm",p);
+  arrow(X,Y+H+40,X+W,Y+H+40,ease(p),"x sc");TS(X+W/2,Y+H+82,txt||[["dh","tc"],[" = 6 cm"]],"lbl",F(p,.6,1),"middle")}
+function dvArrow(p,mot){if(p<=0)return;L(X-12,Y+H,X-56,Y+H,"th sm",p);L(X-12,Y,X-56,Y,"th sm",p);
+  arrow(X-40,Y+H,X-40,Y,ease(p),"x sg");T(X-52,Y+H/2-4,mot||"dv","lbl tg",F(p,.6,1),"end");T(X-52,Y+H/2+28,"4 cm","lbl",F(p,.6,1),"end")}
+
+/* Les triangles des démonstrations. */
+var TR=[[X,Y+H],[X+W,Y+H],[X,Y]],                 // triangle rectangle : la moitié du rectangle
+    HAUT=[[X,Y],[X+W,Y],[X+W,Y+H]],               // l'autre moitié
+    CQ=[250,200],AQ=[150,400],BQ=[450,400],HQ=[250,400],   // triangle quelconque : base 6, hauteur 4
+    AO=[100,400],BO=[300,400],CO=[400,200],HO=[400,400];   // hauteur à l'extérieur : base 4, hauteur 4
+
+var STEPS=[
+{chip:"Le périmètre",badge:"Périmètre",title:"Le périmètre du triangle : on fait le tour",
+ text:"Le périmètre, c’est la longueur du tour. Pour un triangle, on additionne ses trois côtés. C’est une distance : on l’exprime en mm, cm, dm, m, dam, hm ou km.",
+ acts:[[2800,"Voici un triangle. Son périmètre, c’est la longueur de son tour."],
+       [2400,"On part d’un sommet et on suit le bord : 6 cm."],
+       [2200,"On tourne : 4 cm."],
+       [2400,"Et 5 cm pour revenir au départ."],
+       [3600,"On additionne les trois côtés : 6 + 4 + 5 = 15. Le périmètre vaut 15 cm."]],
+ draw:function(q){
+  var A=[150,420],B=[450,420],C=[337.5,254.6],EX=560,o=q(0);
+  poly([A,B,C],"x sm ds",F(o,0,.4));
+  T(EX,110,"Périmètre du triangle","hd",F(o,.3,.7));T(EX,150,"On mesure une distance.","note",F(o,.5,1));
+  var S=[[A,B,[300,458],"6 cm","middle"],[B,C,[420,322],"4 cm","start"],[C,A,[222,316],"5 cm","end"]],n=0;
+  S.forEach(function(s,k){var v=q(k+1);if(v<=0)return;trace([s[0],s[1]],ease(Math.min(1,v/.75)),"pl sa",true);
+    T(s[2][0],s[2][1],s[3],"lbl ta",F(v,.7,1),s[4]);if(v>=.75)n=k+1});
+  if(n)T(EX,240,"P = "+[6,4,5].slice(0,n).join(" + "),"eq");
+  var f=q(4);T(EX,300,"P = 15 cm","eq r",F(f,0,.4));T(EX,380,"On additionne","note",F(f,.3,.7));T(EX,415,"les 3 côtés.","note",F(f,.3,.7))}},
+
+{chip:"La moitié du rectangle",badge:"Aire du triangle rectangle",title:"Le triangle, c’est la moitié du rectangle",
+ text:"On part du rectangle : A = dh × dv = 6 × 4 = 24 cm². On le coupe par sa diagonale : on obtient deux triangles rectangles. En tournant l’un des deux, il recouvre exactement l’autre : ils sont identiques. Chaque triangle est donc la moitié du rectangle : on divise dh × dv par 2, ce qui donne 12 cm².",
+ acts:[[3600,"On part du rectangle : dh × dv = 6 × 4 = 24 cm²."],
+       [2800,"On le coupe en deux par sa diagonale : deux triangles rectangles."],
+       [4200,"On fait tourner le triangle orange : il recouvre exactement le triangle bleu. Les deux sont identiques."],
+       [3800,"Le triangle, c’est donc la moitié du rectangle : on divise par 2."],
+       [3400,"6 × 4 = 24, divisé par 2 : 12 cm²."]],
+ draw:function(q){
+  var EX=560,o=q(0),d=q(1),r=q(2);
+  R(X,Y,W,H,"fc",F(o,0,.5)*(1-F(d,0,.5)));grille(X,Y,6,4,U,.6*F(o,0,.5));R(X,Y,W,H,"pl sk",F(o,0,.3)*(1-.6*F(d,.5,1)));
+  dhArrow(F(o,0,.6));dvArrow(F(o,0,.6));
+  T(EX,110,"Du rectangle…","hd",F(o,.2,.5));TS(EX,175,[["A = "],["dh","tc"],[" × "],["dv","tg"]],"eq",F(o,.3,.6));T(EX,220,"= 6 × 4 = 24 cm²","eq",F(o,.5,.8));
+  if(d>0){poly(TR,"fc",F(d,0,.5));
+    var hp=r>0?rot(HAUT,[X+W/2,Y+H/2],180*ease(r)):HAUT;
+    if(r>0)poly(HAUT,"x so ds",.8);
+    poly(hp,"fo",F(d,0,.5));poly(hp,"x so",F(d,0,.5));poly(TR,"x sc",F(d,0,.5));
+    trace([[X,Y],[X+W,Y+H]],ease(F(d,0,.6)),"pl sa",false)}
+  var m=q(3);T(EX,290,"… au triangle","hd",F(m,0,.4));FR(EX,365,[[["A = "]],H2([["dh","tc"],[" × "],["dv","tg"]])],"eq",F(m,.3,.7));
+  FR(EX,465,[[["A = "]],H2([["6 × 4"]]),[[" = 12 cm²"]]],"eq r",F(q(4),0,.4))}},
+
+{chip:"Base et hauteur",badge:"Les bons noms",title:"dh devient la base, dv devient la hauteur",
+ text:"Pour le triangle, la distance horizontale s’appelle la base (b) et la distance verticale s’appelle la hauteur (h). La hauteur est toujours perpendiculaire à la base : elle fait un angle droit avec elle. La formule devient : base × hauteur, divisé par 2.",
+ acts:[[3000,"Le triangle rectangle, avec sa distance horizontale et sa distance verticale."],
+       [3000,"La distance horizontale, c’est la base du triangle."],
+       [3400,"La distance verticale, c’est la hauteur. Elle fait un angle droit avec la base."],
+       [3400,"On remplace les noms dans la formule : base × hauteur, divisé par 2."],
+       [3400,"En abrégé, avec les lettres b et h."]],
+ draw:function(q){
+  var EX=500,o=q(0),b=q(1),h=q(2);
+  poly(TR,"fc",F(o,0,.4));poly(TR,"pl sk",F(o,0,.4));
+  if(b<=0)dhArrow(F(o,0,.6));else dhArrow(1,[["base","tc"],[" = 6 cm"]]);
+  if(b>0)L(X,Y+H,X+W,Y+H,"pl sc",F(b,0,.4));
+  if(h<=0)dvArrow(F(o,0,.6));else dvArrow(1,"hauteur");
+  if(h>0){L(X,Y+H,X,Y,"pl sg",F(h,0,.4));droit(X,Y+H,1,F(h,.3,.7),24)}
+  FR(EX,170,[[["A = "]],H2([["dh","tc"],[" × "],["dv","tg"]])],"eq",F(o,.3,.7));
+  FR(EX,275,[[["A = "]],H2([["base","tc"],[" × "],["hauteur","tg"]])],"eq",F(q(3),0,.4));
+  FR(EX,380,[[["A = "]],H2([["b","tc"],[" × "],["h","tg"]])],"eq r",F(q(4),0,.4))}},
+
+{chip:"Triangle quelconque",badge:"Tous les triangles",title:"Un triangle quelconque : toujours la moitié du rectangle",
+ text:"On trace la hauteur : elle coupe le rectangle en deux petits rectangles. Dans chacun, le morceau orange (dehors) est identique au morceau bleu (dedans) : en le tournant, il le recouvre. Le triangle est donc encore la moitié du rectangle b × h : b × h divisé par 2, soit 6 × 4 divisé par 2 = 12 cm².",
+ acts:[[3600,"Un autre triangle, avec la même base (6 cm) et la même hauteur (4 cm). La hauteur tombe à angle droit sur la base."],
+       [3200,"On l’entoure d’un rectangle b × h. La hauteur le coupe en deux petits rectangles."],
+       [4600,"Dans chaque petit rectangle, le morceau orange tourne et recouvre exactement le morceau bleu."],
+       [3800,"Le triangle est donc la moitié du rectangle : b × h, divisé par 2."],
+       [3600,"6 × 4 = 24, divisé par 2 : 12 cm². Même base et même hauteur que le triangle rectangle : même aire."]],
+ draw:function(q){
+  var EX=520,o=q(0),r1=q(1),r2=q(2);
+  var IN1=[AQ,HQ,CQ],IN2=[HQ,BQ,CQ],OUT1=[[150,200],[250,200],[150,400]],OUT2=[[250,200],[450,200],[450,400]];
+  poly([AQ,BQ,CQ],"fc",F(o,0,.4));
+  if(r1>0){R(X,Y,W,H,"x sm ds",F(r1,0,.5));
+    var a=180*ease(r2),o1=rot(OUT1,[200,300],a),o2=rot(OUT2,[350,300],a);
+    if(r2>0){poly(OUT1,"x so ds",.7);poly(OUT2,"x so ds",.7)}
+    poly(o1,"fo",F(r1,.3,.8));poly(o2,"fo",F(r1,.3,.8));poly(o1,"x so",F(r1,.3,.8));poly(o2,"x so",F(r1,.3,.8))}
+  poly([AQ,BQ,CQ],"pl sk",F(o,0,.4));
+  L(CQ[0],CQ[1],HQ[0],HQ[1],"x sg ds",F(o,.2,.6));droit(HQ[0],HQ[1],1,F(o,.4,.8));
+  T(300,445,"b = 6 cm","lbl tc",F(o,.4,.8),"middle");T(262,378,"h = 4 cm","lbl tg",F(o,.5,.9));
+  T(EX,110,"Triangle quelconque","hd",F(o,.2,.6));
+  T(EX,175,"rectangle : b × h","eq",F(r1,.3,.8));
+  T(EX,240,"triangle : la moitié","eq",F(q(3),0,.4));
+  FR(EX,325,[[["A = "]],H2([["b","tc"],[" × "],["h","tg"]])],"eq",F(q(3),.3,.7));
+  FR(EX,430,[[["A = "]],H2([["6 × 4"]]),[[" = 12 cm²"]]],"eq r",F(q(4),0,.4))}},
+
+{chip:"Hauteur à l’extérieur",badge:"Tous les triangles",title:"Quand la hauteur tombe à l’extérieur",
+ text:"Si le triangle a un angle obtus, la hauteur tombe en dehors : on prolonge la base. Notre triangle, c’est le grand triangle rectangle moins le petit : 12 − 4 = 8 cm². Et la formule donne le même résultat : 4 × 4 divisé par 2 = 8 cm².",
+ acts:[[3800,"Ce triangle a une base de 4 cm. Sa hauteur (4 cm) tombe en dehors : on prolonge la base pour la tracer."],
+       [3600,"Le grand triangle rectangle (vert) : 6 × 4 = 24, divisé par 2 : 12 cm²."],
+       [3600,"Le petit triangle rectangle (orange) : 2 × 4 = 8, divisé par 2 : 4 cm²."],
+       [3800,"On enlève le petit triangle : il reste notre triangle. 12 − 4 = 8 cm²."],
+       [3800,"Avec la formule : 4 × 4 = 16, divisé par 2 : 8 cm². Même résultat : la formule marche pour tous les triangles."]],
+ draw:function(q){
+  var EX=540,o=q(0),g=q(1),p=q(2),e=q(3),f=q(4);
+  if(g>0){poly([AO,HO,CO],"fg",F(g,0,.4)*(1-.6*F(e,0,.6)));poly([AO,HO,CO],"x sg",F(g,0,.4)*(1-.7*F(e,0,.6)));
+    L(AO[0],452,HO[0],452,"th sm",F(g,0,.4));arrow(AO[0],440,HO[0],440,F(g,0,.6),"x sm");T(250,478,"6 cm","lbl",F(g,.4,.8),"middle")}
+  if(p>0){var pt=[BO,HO,CO],gone=F(e,.1,.8); // on enlève le petit triangle : il s'efface sur place
+    poly(pt,"fo",F(p,0,.4)*(1-gone));poly(pt,e>0?"x so ds":"x so",F(p,0,.4)*(1-.5*gone));
+    T(350,388,"2 cm","lbl to",F(p,.3,.7)*(1-gone),"middle")}
+  poly([AO,BO,CO],"fc",F(o,0,.4));poly([AO,BO,CO],"pl sk",F(o,0,.4));
+  L(BO[0],BO[1],HO[0],HO[1],"x sm ds",F(o,.2,.5));L(CO[0],CO[1],HO[0],HO[1],"x sg ds",F(o,.3,.7));droit(HO[0],HO[1],-1,F(o,.5,.9));
+  T(200,388,"b = 4 cm","lbl tc",F(o,.4,.8),"middle");T(412,310,"h = 4 cm","lbl tg",F(o,.5,.9));
+  T(EX,75,"Hauteur à l’extérieur","hd",F(o,.2,.6));
+  T(EX,125,"grand triangle","note",F(g,0,.4),null,"fill:var(--circle)");FR(EX,180,[H2([["6 × 4"]]),[[" = 12 cm²"]]],"eq",F(g,.2,.6));
+  T(EX,242,"petit triangle","note",F(p,0,.4),null,"fill:var(--orange)");FR(EX,297,[H2([["2 × 4"]]),[[" = 4 cm²"]]],"eq",F(p,.2,.6));
+  T(EX,352,"notre triangle","note",F(e,0,.4));T(EX,392,"12 − 4 = 8 cm²","eq",F(e,.2,.6));
+  FR(EX,470,[[["A = "]],H2([["b","tc"],[" × "],["h","tg"]])],"eq",F(f,0,.3));FR(EX,555,[[["= "]],H2([["4 × 4"]]),[[" = 8 cm²"]]],"eq r",F(f,.2,.6))}},
+
+{chip:"Les 5 éléments du calcul",badge:"Formules et calculs",title:"L’aire du triangle en 5 éléments",
+ text:"Comme pour chaque calcul : ce que l’on cherche, la formule, le calcul, la réponse et l’unité de mesure.",
+ acts:[[3000,"Exemple : un triangle de base 6 cm et de hauteur 4 cm."],
+       [3200,"1 · Ce que je cherche : l’aire du triangle, A triangle."],
+       [3200,"2 · La formule : base × hauteur, divisé par 2."],
+       [3200,"3 · Le calcul : on remplace b par 6 et h par 4."],
+       [3000,"4 · La réponse : 12."],
+       [3200,"5 · L’unité de mesure : des cm², car c’est une aire."],
+       [3600,"Les 5 éléments, toujours dans cet ordre."]],
+ draw:function(q){
+  var o=q(0),a=F(o,0,.5),S=40,A=[330,215],B=[570,215],C=[410,55],Hf=[410,215];
+  if(a>0){poly([A,B,C],"fc",a);poly([A,B,C],"pl sk",a);L(C[0],C[1],Hf[0],Hf[1],"x sg ds",a);droit(Hf[0],Hf[1],1,a,14);
+    T(450,250,"b = 6 cm","lbl tc",F(o,.4,.9),"middle");T(420,198,"h = 4 cm","lbl tg",F(o,.4,.9))}
+  var COL=["--accent","--construct","--circle","--orange","--violet"],
+      NOM=["1 · Ce que je cherche","2 · Formule","3 · Calcul","4 · Réponse","5 · Unité"],
+      P=[{t:[["A"],["triangle",null,{dy:"10","font-size":"26"}]],cx:122,w:156,i:1},{t:[["=",null,{dy:"0"}]],cx:226,i:2},{fr:[H2([["b × h"]])],cx:340,w:150,i:2},
+         {t:[["="]],cx:454,i:3},{fr:[H2([["6 × 4"]])],cx:567,w:150,i:3},{t:[["="]],cx:680,i:4},{t:[["12"]],cx:742,w:70,i:4},{t:[["cm²"]],cx:831,w:94,i:5}],
+      YF=372;
+  P.forEach(function(p){var v=q(p.i),op=F(v,0,.35);if(op<=0)return;var col="var("+COL[p.i-1]+")";
+    if(p.w){R(p.cx-p.w/2,YF-76,p.w,122,null,op,"fill:"+col+";fill-opacity:.14;stroke:"+col+";stroke-width:2").setAttribute("rx","12");
+      var ly=p.i%2?482:552;L(p.cx,YF+46,p.cx,ly-32,null,op).setAttribute("style","stroke:"+col+";stroke-width:2");
+      var tg=T(p.cx,ly,NOM[p.i-1],"tag",F(v,.3,.7),"middle","fill:"+col),tw=tg.getComputedTextLength()/2;tg.setAttribute("x",clamp(p.cx,16+tw,884-tw))}
+    if(p.fr)FR(p.cx,YF,p.fr,"big",op,"middle");else TS(p.cx,YF,p.t,"big",op,"middle")})}},
+
+{chip:"À retenir",badge:"Récapitulatif",title:"À retenir",
+ text:"Le périmètre du triangle : on additionne ses trois côtés. Son aire : la moitié du rectangle base × hauteur, donc b × h divisé par 2, pour tous les triangles.",
+ acts:[[3600,"Le périmètre : on fait le tour, on additionne les trois côtés."],
+       [3800,"Le triangle rectangle : la moitié du rectangle."],
+       [4000,"Un triangle quelconque : encore la moitié du rectangle b × h."],
+       [4200,"Hauteur à l’extérieur : le grand triangle moins le petit. b × h divisé par 2, pour tous les triangles."]],
+ draw:function(q){
+  L(450,30,450,570,"th sm",.35);L(30,300,870,300,"th sm",.35);
+  var u=28;
+  // 1. Le périmètre
+  var a=q(0);
+  if(a>0){var A=[60,235],B=[60+6*u,235],C=[60+3.75*u,235-3.307*u];T(40,55,"Périmètre","hd",F(a,0,.2));poly([A,B,C],"x sm ds",F(a,0,.2));
+    trace([A,B,C,A],ease(F(a,.1,.75)),"pl sa",true);T(300,185,"P = 15 cm","eq r",F(a,.8,1))}
+  // 2. La moitié du rectangle
+  var b=q(1);
+  if(b>0){var x=490,y=100,w=6*u,h=4*u;T(490,55,"La moitié","hd",F(b,0,.2));
+    R(x,y,w,h,"x sm ds",F(b,0,.2));poly([[x,y+h],[x+w,y+h],[x,y]],"fc",F(b,.1,.4));
+    var up=rot([[x,y],[x+w,y],[x+w,y+h]],[x+w/2,y+h/2],180*ease(F(b,.35,.8)));poly(up,"fo",F(b,.1,.4));poly(up,"x so",F(b,.1,.4));
+    FR(690,178,[H2([["dh","tc"],[" × "],["dv","tg"]])],"eq r",F(b,.8,1))}
+  // 3. Triangle quelconque
+  var c=q(2);
+  if(c>0){x=60;y=380;w=6*u;h=4*u;var cx=x+2*u;T(40,345,"Quelconque","hd",F(c,0,.2));R(x,y,w,h,"x sm ds",F(c,0,.2));
+    poly([[x,y+h],[x+w,y+h],[cx,y]],"fc",F(c,.1,.4));
+    var k=180*ease(F(c,.35,.8)),p1=rot([[x,y],[cx,y],[x,y+h]],[x+u,y+h/2],k),p2=rot([[cx,y],[x+w,y],[x+w,y+h]],[cx+2*u,y+h/2],k);
+    poly(p1,"fo",F(c,.1,.4));poly(p2,"fo",F(c,.1,.4));poly([[x,y+h],[x+w,y+h],[cx,y]],"pl sk",F(c,0,.2));
+    L(cx,y,cx,y+h,"x sg ds",F(c,0,.2));FR(270,465,[H2([["b","tc"],[" × "],["h","tg"]])],"eq r",F(c,.8,1))}
+  // 4. Hauteur à l'extérieur
+  var d=q(3);
+  if(d>0){x=490;y=380;h=4*u;var A4=[x,y+h],B4=[x+4*u,y+h],C4=[x+6*u,y],H4=[x+6*u,y+h];T(490,345,"Hauteur dehors","hd",F(d,0,.2));
+    poly([A4,H4,C4],"fg",F(d,.1,.4)*(1-.6*F(d,.4,.7)));
+    var sm=[B4,H4,C4];poly(sm,"fo",F(d,.2,.4)*(1-F(d,.5,.8)));poly(sm,"x so ds",F(d,.5,.8));
+    poly([A4,B4,C4],"fc",F(d,0,.2));poly([A4,B4,C4],"pl sk",F(d,0,.2));L(C4[0],C4[1],H4[0],H4[1],"x sg ds",F(d,0,.2));
+    T(720,465,"12 − 4 = 8","eq r",F(d,.8,1))}}}
+];
+
+/* Le déroulé : chaque partie est une suite de gestes ; le temps dit où l'on en est. */
+var START=[],total=0;
+STEPS.forEach(function(s){START.push(total);s.dur=s.acts.reduce(function(a,b){return a+b[0]},0);total+=s.dur});
+function locate(t){t=clamp(t,0,total);var i=STEPS.length-1;while(i>0&&START[i]>t)i--;var s=STEPS[i],l=t-START[i],a=0;
+  while(a<s.acts.length-1&&l>=s.acts[a][0]){l-=s.acts[a][0];a++}return {i:i,a:a,p:clamp(l/s.acts[a][0],0,1)}}
+var shown=-1,shownAct=-1;
+function render(t){var w=locate(t),s=STEPS[w.i];
+  while(G.firstChild)G.removeChild(G.firstChild);
+  s.draw(function(k){return k<w.a?1:k>w.a?0:w.p});
+  if(w.i!==shown){shown=w.i;shownAct=-1;$("badge").textContent=s.badge;$("title").textContent=s.title;$("text").textContent=s.text;
+    [].forEach.call($("chips").children,function(c,j){c.classList.toggle("on",j===w.i);c.setAttribute("aria-current",j===w.i?"step":"false")})}
+  if(w.a!==shownAct){shownAct=w.a;$("gesture").textContent=s.acts[w.a][1]}
+  $("seek").value=Math.round(1000*t/total)}
+
+STEPS.forEach(function(s,i){var b=document.createElement("button");b.type="button";b.className="chip";
+  b.innerHTML="<b>"+(i+1)+"</b><span></span>";b.lastChild.textContent=s.chip;
+  b.onclick=function(){time=START[i];setPlaying(true)};$("chips").appendChild(b)});
+
+var time=0,last=0,playing=true,speed=1;
+function setPlaying(v){playing=v;$("play").textContent=v?"Pause":"Lecture"}
+$("play").onclick=function(){if(!playing&&time>=total)time=0;setPlaying(!playing)};
+$("restart").onclick=function(){time=0;setPlaying(true)};
+$("seek").oninput=function(){time=this.value/1000*total;render(time)};
+$("speed").onchange=function(){speed=parseFloat(this.value)};
+function frame(ts){if(playing){time+=(ts-last)*speed;if(time>=total){time=total;setPlaying(false)}}last=ts;render(time);requestAnimationFrame(frame)}
+requestAnimationFrame(function(ts){last=ts;frame(ts)});
+})();
+</script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js')}</script>
+</body>
+</html>

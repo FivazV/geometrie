@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const SORTIE = resolve(ICI, 'docs');
-const VERSION = '2026-11-27b';
+const VERSION = '2026-11-27c';
 
 const TUILES = [
 	{
@@ -80,6 +80,11 @@ const TUILES = [
 				// (27.11 : animation écrite d'après le document « GM_Notions_Initiales » de l'enseignant.)
 				titre: 'Les notions initiales',
 				animations: [{ source: 'GM_Notions_Initiales.html', fichier: 'notions-initiales.html' }]
+			},
+			{
+				// (27.11 : écrite par Claude, validée par l'enseignant.)
+				titre: 'Le triangle',
+				animations: [{ source: 'GM_Triangle.html', fichier: 'triangle.html' }]
 			}
 		]
 	}
