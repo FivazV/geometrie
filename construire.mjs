@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const ICI = dirname(fileURLToPath(import.meta.url));
 const SORTIE = resolve(ICI, 'docs');
-const VERSION = '2026-11-27a';
+const VERSION = '2026-11-27b';
 
 const TUILES = [
 	{

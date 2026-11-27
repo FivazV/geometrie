@@ -68,7 +68,7 @@ select{background:var(--chip);border:1px solid var(--line);border-radius:8px;pad
 .hd{font-family:var(--f-display);font-size:27px;font-weight:700;fill:var(--ink)}
 .note{font-family:var(--f-body);font-size:23px;fill:var(--muted)}
 .big{font-family:var(--f-math);font-size:48px;fill:var(--ink)}
-.tag{font-family:var(--f-display);font-size:22px;font-weight:700}
+.tag{font-family:var(--f-display);font-size:32px;font-weight:700}
 .num{font-family:var(--f-display);font-size:18px;font-weight:700;fill:#fff}
 .mot{font-family:var(--f-display);font-size:21px;font-weight:600}
 .ta{fill:var(--accent)}.tc{fill:var(--construct)}.tg{fill:var(--circle)}
@@ -230,8 +230,8 @@ var STEPS=[
       YF=380;
   P.forEach(function(p){var v=q(p.i),op=F(v,0,.35);if(op<=0)return;var col="var("+COL[p.i-1]+")";
     if(p.w){R(p.cx-p.w/2,YF-46,p.w,64,null,op,"fill:"+col+";fill-opacity:.14;stroke:"+col+";stroke-width:2").setAttribute("rx","12");
-      var ly=p.i%2?452:516;L(p.cx,YF+20,p.cx,ly-26,null,op).setAttribute("style","stroke:"+col+";stroke-width:2");
-      T(p.cx,ly,NOM[p.i-1],"tag",F(v,.3,.7),"middle","fill:"+col)}
+      var ly=p.i%2?462:532;L(p.cx,YF+20,p.cx,ly-32,null,op).setAttribute("style","stroke:"+col+";stroke-width:2");
+      var tg=T(p.cx,ly,NOM[p.i-1],"tag",F(v,.3,.7),"middle","fill:"+col),tw=tg.getComputedTextLength()/2;tg.setAttribute("x",clamp(p.cx,16+tw,884-tw))}
     TS(p.cx,YF,p.t,"big",op,"middle")});
   var f=q(6);if(f>0)T(450,575,"Ce que je cherche · Formule · Calcul · Réponse · Unité","note",F(f,.2,.6),"middle")}},
 
